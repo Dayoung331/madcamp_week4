@@ -96,7 +96,14 @@ class _DiaryScreenState extends State<DiaryScreen> {
 
   void _changeDate(int days) {
     setState(() {
-      _selectedDate = _selectedDate.add(Duration(days: days));
+      DateTime newDate = _selectedDate.add(Duration(days: days));
+      if (newDate.isAfter(DateTime.now())) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('오늘 이후의 날짜로는 이동할 수 없습니다.')),
+        );
+        return;
+      }
+      _selectedDate = newDate;
       _titleController.clear();
       _contentController.clear();
       _entries.clear();
