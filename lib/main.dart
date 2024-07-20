@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:madcamp_week4/screens/question_screen.dart';
 import 'package:madcamp_week4/screens/diary_screen.dart';
-import 'package:madcamp_week4/screens/mypage_screen.dart';
+import 'package:madcamp_week4/screens/calendar_screen.dart';
 
 void main() {
   runApp(MyApp());
@@ -11,6 +11,7 @@ class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
+      debugShowCheckedModeBanner: false,
       home: MainScreen(),
     );
   }
@@ -27,7 +28,7 @@ class _MainScreenState extends State<MainScreen> {
   static List<Widget> _widgetOptions = <Widget>[
     QuestionScreen(),
     DiaryScreen(),
-    MypageScreen(),
+    CalendarScreen(),
   ];
 
   void _onItemTapped(int index) {
@@ -46,25 +47,35 @@ class _MainScreenState extends State<MainScreen> {
         child: _widgetOptions.elementAt(_selectedIndex),
       ),
       bottomNavigationBar: BottomNavigationBar(
-        items: const <BottomNavigationBarItem>[
+        items: <BottomNavigationBarItem>[
           BottomNavigationBarItem(
-            icon: Icon(Icons.question_answer),
+            icon: ImageIcon(
+              AssetImage('assets/images/question.png'),
+              color: _selectedIndex == 0 ? Color(0xFF776B5D) : Colors.grey,
+            ),
             label: '',
           ),
           BottomNavigationBarItem(
-            icon: Icon(Icons.book),
+            icon: ImageIcon(
+              AssetImage('assets/images/diary.png'),
+              color: _selectedIndex == 1 ? Color(0xFF776B5D) : Colors.grey,
+            ),
             label: '',
           ),
           BottomNavigationBarItem(
-            icon: Icon(Icons.person),
+            icon: ImageIcon(
+              AssetImage('assets/images/calendar.png'),
+              color: _selectedIndex == 2 ? Color(0xFF776B5D) : Colors.grey,
+            ),
             label: '',
           ),
         ],
         currentIndex: _selectedIndex,
-        selectedItemColor: Colors.black,
+        selectedItemColor: Color(0xFF776B5D),
         onTap: _onItemTapped,
         showSelectedLabels: false,
         showUnselectedLabels: false,
+        backgroundColor: Colors.white,
       ),
     );
   }
