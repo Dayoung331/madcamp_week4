@@ -39,9 +39,6 @@ class _MainScreenState extends State<MainScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: Text('Flutter Bottom Navigation'),
-      ),
       body: Center(
         child: _widgetOptions.elementAt(_selectedIndex),
       ),
