@@ -14,10 +14,11 @@ class CalendarScreen extends StatefulWidget {
 }
 
 class _CalendarScreenState extends State<CalendarScreen> {
-  Map<DateTime, List> _events = {};
+  Map<DateTime, List<String>> _events = {};
   Map<String, bool> _isAnswerSubmittedMap = {};
   DateTime _focusedDay = DateTime.now();
   DateTime? _selectedDay;
+  List<String> _selectedEvents = [];
 
   @override
   void initState() {
@@ -88,6 +89,15 @@ class _CalendarScreenState extends State<CalendarScreen> {
     });
   }
 
+  void _onDaySelected(DateTime selectedDay, DateTime focusedDay) {
+    setState(() {
+      _selectedDay = selectedDay;
+      _focusedDay = focusedDay;
+      _selectedEvents = _events[selectedDay] ?? [];
+    });
+    widget.onDateSelected(selectedDay);
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -99,192 +109,248 @@ class _CalendarScreenState extends State<CalendarScreen> {
         centerTitle: true,
         backgroundColor: Color(0xFFE5D0B5), // 앱바 배경색 변경
       ),
-      body: Center(
-        child: AspectRatio(
-          aspectRatio: 0.9, // 이 값을 조정하여 달력의 높이를 조정할 수 있습니다.
-          child: TableCalendar(
-            locale: 'ko_KR', // 달력 로케일을 한국어로 설정
-            firstDay: DateTime(DateTime.now().year, 1, 1),
-            lastDay: DateTime(DateTime.now().year, 12, 31),
-            focusedDay: _focusedDay,
-            selectedDayPredicate: (day) {
-              return isSameDay(_selectedDay, day);
-            },
-            onDaySelected: (selectedDay, focusedDay) {
-              setState(() {
-                _selectedDay = selectedDay;
-                _focusedDay = focusedDay;
-              });
-              widget.onDateSelected(selectedDay);
-            },
-            headerStyle: HeaderStyle(
-              titleCentered: true,
-              formatButtonVisible: false,
-              titleTextStyle: TextStyle(
-                fontFamily: 'AppleMyungjo', // 글씨체 변경
-                fontWeight: FontWeight.w700,
-                fontSize: 20.0,
-                color: Colors.black, // 제목 색상 변경
+      body: Column(
+        children: [
+          AspectRatio(
+            aspectRatio: 0.9, // 이 값을 조정하여 달력의 높이를 조정할 수 있습니다.
+            child: TableCalendar(
+              locale: 'ko_KR', // 달력 로케일을 한국어로 설정
+              firstDay: DateTime(DateTime.now().year, 1, 1),
+              lastDay: DateTime(DateTime.now().year, 12, 31),
+              focusedDay: _focusedDay,
+              selectedDayPredicate: (day) {
+                return isSameDay(_selectedDay, day);
+              },
+              onDaySelected: _onDaySelected,
+              headerStyle: HeaderStyle(
+                titleCentered: true,
+                formatButtonVisible: false,
+                titleTextStyle: TextStyle(
+                  fontFamily: 'AppleMyungjo', // 글씨체 변경
+                  fontWeight: FontWeight.w700,
+                  fontSize: 20.0,
+                  color: Colors.black, // 제목 색상 변경
+                ),
+                leftChevronIcon: Icon(Icons.chevron_left, color: Colors.black), // 왼쪽 화살표 색상 변경
+                rightChevronIcon: Icon(Icons.chevron_right, color: Colors.black), // 오른쪽 화살표 색상 변경
               ),
-              leftChevronIcon: Icon(Icons.chevron_left, color: Colors.black), // 왼쪽 화살표 색상 변경
-              rightChevronIcon: Icon(Icons.chevron_right, color: Colors.black), // 오른쪽 화살표 색상 변경
-            ),
-            daysOfWeekStyle: DaysOfWeekStyle(
-              weekdayStyle: TextStyle(
-                fontFamily: 'AppleMyungjo', // 평일 글씨체 변경
-                color: Colors.black,
+              daysOfWeekStyle: DaysOfWeekStyle(
+                weekdayStyle: TextStyle(
+                  fontFamily: 'AppleMyungjo', // 평일 글씨체 변경
+                  color: Colors.black,
+                ),
+                weekendStyle: TextStyle(
+                  fontFamily: 'AppleMyungjo', // 주말 글씨체 변경
+                  color: Colors.red, // 일요일 글씨체 변경
+                ),
               ),
-              weekendStyle: TextStyle(
-                fontFamily: 'AppleMyungjo', // 주말 글씨체 변경
-                color: Colors.red, // 일요일 글씨체 변경
+              calendarStyle: CalendarStyle(
+                outsideDaysVisible: false,
+                weekendTextStyle: TextStyle(
+                  fontFamily: 'AppleMyungjo', // 주말 글씨체 변경
+                  color: Colors.red, // 일요일 글씨체 변경
+                ),
+                holidayTextStyle: TextStyle(
+                  fontFamily: 'AppleMyungjo', // 공휴일 글씨체 변경
+                  color: Colors.blue,
+                ),
+                selectedTextStyle: TextStyle(
+                  fontFamily: 'AppleMyungjo', // 선택된 날짜 글씨체 변경
+                  color: Colors.white,
+                ),
+                todayTextStyle: TextStyle(
+                  fontFamily: 'AppleMyungjo', // 오늘 날짜 글씨체 변경
+                  color: Colors.white,
+                ),
+                defaultTextStyle: TextStyle(
+                  fontFamily: 'AppleMyungjo', // 기본 날짜 글씨체 변경
+                  color: Colors.black,
+                ),
+                selectedDecoration: BoxDecoration(
+                  color: Color(0xFFE5D0B5),
+                  shape: BoxShape.circle,
+                ),
+                todayDecoration: BoxDecoration(
+                  color: Colors.orangeAccent,
+                  shape: BoxShape.circle,
+                ),
+                cellMargin: EdgeInsets.all(8.0), // 각 셀의 여백을 조정하여 셀 크기 증가
               ),
-            ),
-            calendarStyle: CalendarStyle(
-              outsideDaysVisible: false,
-              weekendTextStyle: TextStyle(
-                fontFamily: 'AppleMyungjo', // 주말 글씨체 변경
-                color: Colors.red, // 일요일 글씨체 변경
-              ),
-              holidayTextStyle: TextStyle(
-                fontFamily: 'AppleMyungjo', // 공휴일 글씨체 변경
-                color: Colors.blue,
-              ),
-              selectedTextStyle: TextStyle(
-                fontFamily: 'AppleMyungjo', // 선택된 날짜 글씨체 변경
-                color: Colors.white,
-              ),
-              todayTextStyle: TextStyle(
-                fontFamily: 'AppleMyungjo', // 오늘 날짜 글씨체 변경
-                color: Colors.white,
-              ),
-              defaultTextStyle: TextStyle(
-                fontFamily: 'AppleMyungjo', // 기본 날짜 글씨체 변경
-                color: Colors.black,
-              ),
-              selectedDecoration: BoxDecoration(
-                color: Color(0xFFE5D0B5),
-                shape: BoxShape.circle,
-              ),
-              todayDecoration: BoxDecoration(
-                color: Colors.orangeAccent,
-                shape: BoxShape.circle,
-              ),
-              cellMargin: EdgeInsets.all(8.0), // 각 셀의 여백을 조정하여 셀 크기 증가
-            ),
-            calendarBuilders: CalendarBuilders(
-              dowBuilder: (context, day) {
-                if (day.weekday == DateTime.sunday) {
-                  return Center(
+              calendarBuilders: CalendarBuilders(
+                dowBuilder: (context, day) {
+                  if (day.weekday == DateTime.sunday) {
+                    return Center(
+                      child: Text(
+                        '일',
+                        style: TextStyle(
+                          fontFamily: 'AppleMyungjo',
+                          color: Colors.red,
+                        ),
+                      ),
+                    );
+                  } else if (day.weekday == DateTime.saturday) {
+                    return Center(
+                      child: Text(
+                        '토',
+                        style: TextStyle(
+                          fontFamily: 'AppleMyungjo',
+                          color: Colors.blue,
+                        ),
+                      ),
+                    );
+                  } else {
+                    return Center(
+                      child: Text(
+                        DateFormat.E('ko_KR').format(day),
+                        style: TextStyle(
+                          fontFamily: 'AppleMyungjo',
+                          color: Colors.black,
+                        ),
+                      ),
+                    );
+                  }
+                },
+                defaultBuilder: (context, date, focusedDay) {
+                  return Container(
+                    margin: EdgeInsets.all(16.0), // 셀 내부의 여백을 늘려 셀 크기 증가
+                    alignment: Alignment.center,
                     child: Text(
-                      '일',
+                      date.day.toString(),
                       style: TextStyle(
-                        fontFamily: 'AppleMyungjo',
-                        color: Colors.red,
+                        fontFamily: 'AppleMyungjo', // 날짜 글씨체 변경
+                        fontSize: 16.0,
+                        color: date.weekday == DateTime.saturday
+                            ? Colors.blue
+                            : (date.weekday == DateTime.sunday ? Colors.red : Colors.black),
                       ),
                     ),
                   );
-                } else if (day.weekday == DateTime.saturday) {
-                  return Center(
+                },
+                selectedBuilder: (context, date, focusedDay) {
+                  return Container(
+                    margin: EdgeInsets.all(8.0), // 셀 내부의 여백을 늘려 셀 크기 증가
+                    alignment: Alignment.center,
+                    decoration: BoxDecoration(
+                      color: Color(0xFFE5D0B5),
+                      shape: BoxShape.circle,
+                    ),
                     child: Text(
-                      '토',
+                      date.day.toString(),
                       style: TextStyle(
-                        fontFamily: 'AppleMyungjo',
-                        color: Colors.blue,
+                        fontFamily: 'AppleMyungjo', // 선택된 날짜 글씨체 변경
+                        fontSize: 16.0,
+                        color: Colors.white,
                       ),
                     ),
                   );
-                } else {
-                  return Center(
+                },
+                todayBuilder: (context, date, focusedDay) {
+                  return Container(
+                    margin: EdgeInsets.all(8.0), // 셀 내부의 여백을 늘려 셀 크기 증가
+                    alignment: Alignment.center,
+                    decoration: BoxDecoration(
+                      color: Colors.orangeAccent,
+                      shape: BoxShape.circle,
+                    ),
                     child: Text(
-                      DateFormat.E('ko_KR').format(day),
+                      date.day.toString(),
                       style: TextStyle(
-                        fontFamily: 'AppleMyungjo',
-                        color: Colors.black,
+                        fontFamily: 'AppleMyungjo', // 오늘 날짜 글씨체 변경
+                        fontSize: 16.0,
+                        color: Colors.white,
                       ),
                     ),
                   );
-                }
-              },
-              defaultBuilder: (context, date, focusedDay) {
-                return Container(
-                  margin: EdgeInsets.all(16.0), // 셀 내부의 여백을 늘려 셀 크기 증가
-                  alignment: Alignment.center,
-                  child: Text(
-                    date.day.toString(),
-                    style: TextStyle(
-                      fontFamily: 'AppleMyungjo', // 날짜 글씨체 변경
-                      fontSize: 16.0,
-                      color: date.weekday == DateTime.saturday
-                          ? Colors.blue
-                          : (date.weekday == DateTime.sunday ? Colors.red : Colors.black),
-                    ),
-                  ),
-                );
-              },
-              selectedBuilder: (context, date, focusedDay) {
-                return Container(
-                  margin: EdgeInsets.all(8.0), // 셀 내부의 여백을 늘려 셀 크기 증가
-                  alignment: Alignment.center,
-                  decoration: BoxDecoration(
-                    color: Color(0xFFE5D0B5),
-                    shape: BoxShape.circle,
-                  ),
-                  child: Text(
-                    date.day.toString(),
-                    style: TextStyle(
-                      fontFamily: 'AppleMyungjo', // 선택된 날짜 글씨체 변경
-                      fontSize: 16.0,
-                      color: Colors.white,
-                    ),
-                  ),
-                );
-              },
-              todayBuilder: (context, date, focusedDay) {
-                return Container(
-                  margin: EdgeInsets.all(8.0), // 셀 내부의 여백을 늘려 셀 크기 증가
-                  alignment: Alignment.center,
-                  decoration: BoxDecoration(
-                    color: Colors.orangeAccent,
-                    shape: BoxShape.circle,
-                  ),
-                  child: Text(
-                    date.day.toString(),
-                    style: TextStyle(
-                      fontFamily: 'AppleMyungjo', // 오늘 날짜 글씨체 변경
-                      fontSize: 16.0,
-                      color: Colors.white,
-                    ),
-                  ),
-                );
-              },
-              markerBuilder: (context, date, events) {
-                if (events.isNotEmpty) {
-                  return Positioned(
-                    bottom: 1,
-                    child: Row(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: events.map((event) {
-                        return Container(
-                          width: 7,
-                          height: 7,
-                          margin: EdgeInsets.symmetric(horizontal: 1.5),
-                          decoration: BoxDecoration(
-                            shape: BoxShape.circle,
-                            color: event == 'Submitted' ? Colors.blue : Colors.green,
-                          ),
-                        );
-                      }).toList(),
-                    ),
-                  );
-                }
-                return SizedBox();
+                },
+                markerBuilder: (context, date, events) {
+                  if (events.isNotEmpty) {
+                    return Positioned(
+                      bottom: 1,
+                      child: Row(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: events.map((event) {
+                          return Container(
+                            width: 7,
+                            height: 7,
+                            margin: EdgeInsets.symmetric(horizontal: 1.5),
+                            decoration: BoxDecoration(
+                              shape: BoxShape.circle,
+                              color: event == 'Submitted' ? Colors.blue : Colors.green,
+                            ),
+                          );
+                        }).toList(),
+                      ),
+                    );
+                  }
+                  return SizedBox();
+                },
+              ),
+              eventLoader: (day) {
+                return _events[day] ?? [];
               },
             ),
-            eventLoader: (day) {
-              return _events[day] ?? [];
-            },
           ),
+          Expanded(
+            child: ListView.builder(
+              itemCount: _selectedEvents.length,
+              itemBuilder: (context, index) {
+                final event = _selectedEvents[index];
+                return ScheduleCard(
+                  title: event,
+                  color: event == 'Submitted' ? Colors.blue : Colors.green,
+                  onTap: () {
+                    // 다른 화면으로 이동할 때 Navigator 사용
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (context) => EventDetailScreen(event: event),
+                      ),
+                    );
+                  },
+                );
+              },
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class ScheduleCard extends StatelessWidget {
+  final String title;
+  final Color color;
+  final Function onTap;
+
+  ScheduleCard({required this.title, required this.color, required this.onTap});
+
+  @override
+  Widget build(BuildContext context) {
+    return GestureDetector(
+      onTap: () => onTap(),
+      child: Card(
+        color: color,
+        child: ListTile(
+          title: Text(title, style: TextStyle(color: Colors.white)),
         ),
+      ),
+    );
+  }
+}
+
+class EventDetailScreen extends StatelessWidget {
+  final String event;
+
+  EventDetailScreen({required this.event});
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(
+        title: Text('Event Details'),
+      ),
+      body: Center(
+        child: Text('Details for $event'),
       ),
     );
   }
