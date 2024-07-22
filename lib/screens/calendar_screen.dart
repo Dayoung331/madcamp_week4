@@ -2,7 +2,6 @@ import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:table_calendar/table_calendar.dart';
-import 'package:intl/intl.dart';
 
 class CalendarScreen extends StatefulWidget {
   final Function(DateTime) onDateSelected;
@@ -23,6 +22,17 @@ class _CalendarScreenState extends State<CalendarScreen> {
   void initState() {
     super.initState();
     _loadSubmittedStatus();
+    _printStoredData(); // 저장된 데이터를 출력합니다.
+  }
+
+  Future<void> _printStoredData() async {
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    String? submittedStatusString = prefs.getString('submittedStatus');
+    if (submittedStatusString != null) {
+      print("Stored Submitted Status: $submittedStatusString");
+    } else {
+      print("No submitted status found in SharedPreferences.");
+    }
   }
 
   Future<void> _loadSubmittedStatus() async {
@@ -35,20 +45,27 @@ class _CalendarScreenState extends State<CalendarScreen> {
         _populateEvents();
       });
     }
+    // 디버깅 메시지 추가
+    print("Loaded Submitted Status: $_isAnswerSubmittedMap");
   }
 
   void _populateEvents() {
     _events.clear();
     _isAnswerSubmittedMap.forEach((key, value) {
       if (value) {
-        DateTime date = DateFormat('MMdd').parse(key);
-        date = DateTime(DateTime.now().year, date.month, date.day);
+        // 현재 연도를 포함하여 날짜 문자열을 생성하고 로컬 시간으로 변환 후 UTC로 변환
+        DateTime date = DateTime(DateTime.now().year, int.parse(key.substring(0, 2)), int.parse(key.substring(2, 4)));
+        date = DateTime.utc(date.year, date.month, date.day);
         if (_events[date] == null) {
           _events[date] = [];
         }
         _events[date]!.add('Submitted');
+        // 디버깅 메시지 추가
+        print("Event added for date: $date");
       }
     });
+    // 디버깅 메시지 추가
+    print("Events populated: $_events");
   }
 
   @override
@@ -75,6 +92,7 @@ class _CalendarScreenState extends State<CalendarScreen> {
         calendarBuilders: CalendarBuilders(
           markerBuilder: (context, date, events) {
             if (events.isNotEmpty) {
+              print("Marker builder for date: $date with events: $events"); // 디버깅 메시지 추가
               return Positioned(
                 bottom: 1,
                 child: Container(
@@ -91,6 +109,8 @@ class _CalendarScreenState extends State<CalendarScreen> {
           },
         ),
         eventLoader: (day) {
+          // 디버깅 메시지 추가
+          print("Events for $day: ${_events[day]}");
           return _events[day] ?? [];
         },
       ),

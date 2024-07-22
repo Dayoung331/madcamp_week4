@@ -30,7 +30,10 @@ class _MainScreenState extends State<MainScreen> {
   static List<Widget> _widgetOptions = <Widget>[
     QuestionScreen(),
     DiaryScreen(), // 임의의 초기 날짜로 초기화
-    // CalendarScreen() 호출 시 onDateSelected 전달 필요
+    CalendarScreen(onDateSelected: (date) {
+      // 날짜 선택 시 실행될 함수
+      print('Selected date: $date');
+    }),
   ];
 
   void _onItemTapped(int index) {
