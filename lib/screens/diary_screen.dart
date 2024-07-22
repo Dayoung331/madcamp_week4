@@ -83,6 +83,38 @@ class _DiaryScreenState extends State<DiaryScreen> {
     });
   }
 
+  Future<void> _deleteEntry(int index) async {
+    final prefs = await SharedPreferences.getInstance();
+    String formattedDate = DateFormat('yyyy.MM.dd').format(_selectedDate);
+
+    await prefs.remove('diary_title_${formattedDate}_$index');
+    await prefs.remove('diary_content_${formattedDate}_$index');
+    await prefs.remove('diary_time_${formattedDate}_$index');
+
+    setState(() {
+      _entries.removeAt(index);
+      _hasSavedData = _entries.isNotEmpty;
+    });
+  }
+
+  void _changeDate(int days) {
+    setState(() {
+      DateTime newDate = _selectedDate.add(Duration(days: days));
+      if (newDate.isAfter(DateTime.now())) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('오늘 이후의 날짜로는 이동할 수 없습니다.')),
+        );
+        return;
+      }
+      _selectedDate = newDate;
+      _titleController.clear();
+      _contentController.clear();
+      _entries.clear();
+      _hasSavedData = false;
+      _loadSavedDiary();
+    });
+  }
+
   @override
   Widget build(BuildContext context) {
     String formattedDate = DateFormat('yyyy. MM. dd').format(widget.selectedDay); // 날짜 형식 수정
@@ -92,13 +124,25 @@ class _DiaryScreenState extends State<DiaryScreen> {
       appBar: AppBar(
         title: Text(formattedDate),
         centerTitle: true,
+        elevation: 0, // AppBar의 그림자 제거
+        scrolledUnderElevation: 0, // 스크롤 시 그림자 제거
         backgroundColor: Colors.white,
         leading: IconButton(
-          icon: Icon(Icons.arrow_back_ios),
+          padding: const EdgeInsets.only(left: 35.0),
+          icon: Icon(Icons.arrow_back_ios, color: Colors.black),
           onPressed: () {
             Navigator.of(context).pop(); // 이전 화면으로 이동
           },
         ),
+        actions: [
+          IconButton(
+            padding: const EdgeInsets.only(right: 35.0),
+            icon: Icon(Icons.arrow_forward_ios, color: Colors.black),
+            onPressed: () {
+              _changeDate(1); // 날짜를 하루 늘립니다.
+            },
+          ),
+        ],
       ),
       body: Padding(
         padding: const EdgeInsets.all(16.0),
@@ -115,13 +159,44 @@ class _DiaryScreenState extends State<DiaryScreen> {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Text(
-                      _entries[index]['title']!,
-                      style: TextStyle(
-                        fontSize: 20,
-                        fontWeight: FontWeight.bold,
-                        fontFamily: 'AppleMyungjo',
-                      ),
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        Text(
+                          _entries[index]['title']!,
+                          style: TextStyle(
+                            fontSize: 20,
+                            fontWeight: FontWeight.bold,
+                            fontFamily: 'AppleMyungjo',
+                          ),
+                        ),
+                        Row(
+                          children: [
+                            TextButton(
+                              onPressed: () {
+                                // 수정 기능 구현
+                              },
+                              child: Text(
+                                '수정',
+                                style: TextStyle(
+                                  fontFamily: 'AppleMyungjo',
+                                  color: Colors.grey.shade600,
+                                ),
+                              ),
+                            ),
+                            TextButton(
+                              onPressed: () => _deleteEntry(index),
+                              child: Text(
+                                '삭제',
+                                style: TextStyle(
+                                  fontFamily: 'AppleMyungjo',
+                                  color: Colors.grey.shade600,
+                                ),
+                              ),
+                            ),
+                          ],
+                        ),
+                      ],
                     ),
                     SizedBox(height: 20.0),
                     Text(
