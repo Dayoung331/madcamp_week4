@@ -2,21 +2,11 @@ import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:intl/intl.dart';
 
-void main() {
-  runApp(MyApp());
-}
-
-class MyApp extends StatelessWidget {
-  @override
-  Widget build(BuildContext context) {
-    return MaterialApp(
-      debugShowCheckedModeBanner: false,
-      home: DiaryScreen(),
-    );
-  }
-}
-
 class DiaryScreen extends StatefulWidget {
+  final DateTime selectedDay;
+
+  DiaryScreen({required this.selectedDay});
+
   @override
   _DiaryScreenState createState() => _DiaryScreenState();
 }
@@ -24,7 +14,6 @@ class DiaryScreen extends StatefulWidget {
 class _DiaryScreenState extends State<DiaryScreen> {
   final TextEditingController _titleController = TextEditingController();
   final TextEditingController _contentController = TextEditingController();
-  DateTime _selectedDate = DateTime.now();
   List<Map<String, String>> _entries = [];
   bool _hasSavedData = false;
 
@@ -36,7 +25,7 @@ class _DiaryScreenState extends State<DiaryScreen> {
 
   Future<void> _loadSavedDiary() async {
     final prefs = await SharedPreferences.getInstance();
-    String formattedDate = DateFormat('yyyy.MM.dd').format(_selectedDate);
+    String formattedDate = DateFormat('yyyy.MM.dd').format(widget.selectedDay);
 
     setState(() {
       _entries.clear();
@@ -71,7 +60,7 @@ class _DiaryScreenState extends State<DiaryScreen> {
     }
 
     final prefs = await SharedPreferences.getInstance();
-    String formattedDate = DateFormat('yyyy.MM.dd').format(_selectedDate);
+    String formattedDate = DateFormat('yyyy.MM.dd').format(widget.selectedDay);
     String formattedTime = DateFormat('a hh:mm').format(DateTime.now()); // 시간 형식 수정
     int index = _entries.length;
 
@@ -94,27 +83,9 @@ class _DiaryScreenState extends State<DiaryScreen> {
     });
   }
 
-  void _changeDate(int days) {
-    setState(() {
-      DateTime newDate = _selectedDate.add(Duration(days: days));
-      if (newDate.isAfter(DateTime.now())) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('오늘 이후의 날짜로는 이동할 수 없습니다.')),
-        );
-        return;
-      }
-      _selectedDate = newDate;
-      _titleController.clear();
-      _contentController.clear();
-      _entries.clear();
-      _hasSavedData = false;
-      _loadSavedDiary();
-    });
-  }
-
   @override
   Widget build(BuildContext context) {
-    String formattedDate = DateFormat('yyyy. MM. dd').format(_selectedDate); // 날짜 형식 수정
+    String formattedDate = DateFormat('yyyy. MM. dd').format(widget.selectedDay); // 날짜 형식 수정
 
     return Scaffold(
       backgroundColor: Colors.white,
@@ -125,17 +96,9 @@ class _DiaryScreenState extends State<DiaryScreen> {
         leading: IconButton(
           icon: Icon(Icons.arrow_back_ios),
           onPressed: () {
-            _changeDate(-1); // 날짜를 하루 줄입니다.
+            Navigator.of(context).pop(); // 이전 화면으로 이동
           },
         ),
-        actions: [
-          IconButton(
-            icon: Icon(Icons.arrow_forward_ios),
-            onPressed: () {
-              _changeDate(1); // 날짜를 하루 늘립니다.
-            },
-          ),
-        ],
       ),
       body: Padding(
         padding: const EdgeInsets.all(16.0),
@@ -162,7 +125,7 @@ class _DiaryScreenState extends State<DiaryScreen> {
                     ),
                     SizedBox(height: 20.0),
                     Text(
-                      '${DateFormat('yyyy년 M월 d일').format(_selectedDate)} ${_entries[index]['time']!}',
+                      '${DateFormat('yyyy년 M월 d일').format(widget.selectedDay)} ${_entries[index]['time']!}',
                       style: TextStyle(
                         color: Colors.grey,
                         fontSize: 14,

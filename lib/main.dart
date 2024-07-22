@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:madcamp_week4/screens/question_screen.dart';
 import 'package:madcamp_week4/screens/diary_screen.dart';
 import 'package:madcamp_week4/screens/calendar_screen.dart';
+import 'package:intl/intl.dart';
 
 void main() {
   runApp(MyApp());
@@ -24,11 +25,12 @@ class MainScreen extends StatefulWidget {
 
 class _MainScreenState extends State<MainScreen> {
   int _selectedIndex = 0;
+  DateTime _selectedDate = DateTime.now();
 
   static List<Widget> _widgetOptions = <Widget>[
     QuestionScreen(),
-    DiaryScreen(),
-    CalendarScreen(),
+    DiaryScreen(selectedDay: DateTime.now()), // 임의의 초기 날짜로 초기화
+    // CalendarScreen() 호출 시 onDateSelected 전달 필요
   ];
 
   void _onItemTapped(int index) {
@@ -37,11 +39,21 @@ class _MainScreenState extends State<MainScreen> {
     });
   }
 
+  void _onDateSelected(DateTime selectedDate) {
+    setState(() {
+      _selectedDate = selectedDate;
+      _widgetOptions[1] = DiaryScreen(selectedDay: selectedDate);
+      _widgetOptions[0] = QuestionScreen(); // 선택된 날짜에 따라 다른 QuestionScreen 내용 업데이트 가능
+    });
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       body: Center(
-        child: _widgetOptions.elementAt(_selectedIndex),
+        child: _selectedIndex == 2
+            ? CalendarScreen(onDateSelected: _onDateSelected)
+            : _widgetOptions.elementAt(_selectedIndex),
       ),
       bottomNavigationBar: BottomNavigationBar(
         items: <BottomNavigationBarItem>[

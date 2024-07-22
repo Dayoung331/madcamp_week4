@@ -36,6 +36,33 @@ class PastAnswersScreen extends StatelessWidget {
     Navigator.of(context).pop(true);
   }
 
+  void _showDeleteConfirmationDialog(BuildContext context, String year) {
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: Text('삭제 확인'),
+          content: Text('정말로 삭제하시겠습니까?'),
+          actions: [
+            TextButton(
+              onPressed: () {
+                Navigator.of(context).pop();
+              },
+              child: Text('아니요'),
+            ),
+            TextButton(
+              onPressed: () {
+                Navigator.of(context).pop(); // 다이얼로그 닫기
+                _deleteAnswer(context, year); // 답변 삭제
+              },
+              child: Text('예'),
+            ),
+          ],
+        );
+      },
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -54,8 +81,8 @@ class PastAnswersScreen extends StatelessWidget {
               subtitle: Text(answer),
               trailing: IconButton(
                 icon: Icon(Icons.delete),
-                onPressed: () async {
-                  await _deleteAnswer(context, year);
+                onPressed: () {
+                  _showDeleteConfirmationDialog(context, year);
                 },
               ),
             );
