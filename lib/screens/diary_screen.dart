@@ -78,6 +78,10 @@ class _DiaryScreenState extends State<DiaryScreen> {
     await prefs.setString('diary_title_${formattedDate}_$index', _titleController.text);
     await prefs.setString('diary_content_${formattedDate}_$index', _contentController.text);
     await prefs.setString('diary_time_${formattedDate}_$index', formattedTime);
+
+    // 날짜 저장
+    await prefs.setBool('diary_written_${formattedDate}', true);
+
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(content: Text('저장되었습니다.')),
     );
