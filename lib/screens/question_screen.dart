@@ -174,21 +174,23 @@ class _QuestionScreenState extends State<QuestionScreen> {
 
     return Scaffold(
       appBar: AppBar(
+        backgroundColor: Colors.white,
         title: Row(
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
             IconButton(
-              icon: Icon(Icons.arrow_back),
+              padding: const EdgeInsets.only(left: 15.0),
+              icon: Icon(Icons.arrow_back_ios),
               onPressed: () {
                 _changeDate(-1);
               },
             ),
             Text(
               DateFormat('yyyy. MM. dd').format(_currentDate),
-              style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
             ),
             IconButton(
-              icon: Icon(Icons.arrow_forward),
+              padding: const EdgeInsets.only(right: 15.0),
+              icon: Icon(Icons.arrow_forward_ios),
               onPressed: () {
                 _changeDate(1);
               },
@@ -197,6 +199,7 @@ class _QuestionScreenState extends State<QuestionScreen> {
         ),
         centerTitle: true,
       ),
+      backgroundColor: Colors.white,
       body: SingleChildScrollView(
         padding: const EdgeInsets.all(16.0),
         child: Column(

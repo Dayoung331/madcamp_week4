@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:intl/intl.dart';
+import 'package:http/http.dart' as http;
+import 'dart:convert';
 
 void main() {
   runApp(MyApp());
@@ -25,7 +27,7 @@ class _DiaryScreenState extends State<DiaryScreen> {
   final TextEditingController _titleController = TextEditingController();
   final TextEditingController _contentController = TextEditingController();
   DateTime _selectedDate = DateTime.now();
-  List<Map<String, String>> _entries = [];
+  List<Map<String, dynamic>> _entries = [];
   bool _hasSavedData = false;
 
   @override
@@ -35,30 +37,19 @@ class _DiaryScreenState extends State<DiaryScreen> {
   }
 
   Future<void> _loadSavedDiary() async {
-    final prefs = await SharedPreferences.getInstance();
-    String formattedDate = DateFormat('yyyy.MM.dd').format(_selectedDate);
+    String formattedDate = DateFormat('yyyy-MM-dd').format(_selectedDate);
+    final response = await http.get(Uri.parse('http://10.0.2.2:3000/diaries/$formattedDate'));
 
-    setState(() {
-      _entries.clear();
-      _hasSavedData = false;
-    });
-
-    int index = 0;
-    while (true) {
-      String? title = prefs.getString('diary_title_${formattedDate}_$index');
-      String? content = prefs.getString('diary_content_${formattedDate}_$index');
-      String? time = prefs.getString('diary_time_${formattedDate}_$index');
-
-      if (title == null || content == null || time == null) {
-        break;
-      }
-
+    if (response.statusCode == 200) {
       setState(() {
-        _entries.add({'title': title, 'content': content, 'time': time});
-        _hasSavedData = true;
+        _entries = List<Map<String, dynamic>>.from(json.decode(response.body));
+        _hasSavedData = _entries.isNotEmpty;
       });
-
-      index++;
+    } else {
+      setState(() {
+        _entries = [];
+        _hasSavedData = false;
+      });
     }
   }
 
@@ -70,42 +61,218 @@ class _DiaryScreenState extends State<DiaryScreen> {
       return;
     }
 
-    final prefs = await SharedPreferences.getInstance();
-    String formattedDate = DateFormat('yyyy.MM.dd').format(_selectedDate);
-    String formattedTime = DateFormat('a hh:mm').format(DateTime.now()); // 시간 형식 수정
-    int index = _entries.length;
+    String formattedDate = DateFormat('yyyy-MM-dd').format(_selectedDate);
+    String formattedTime = DateFormat('a hh:mm').format(DateTime.now());
 
-    await prefs.setString('diary_title_${formattedDate}_$index', _titleController.text);
-    await prefs.setString('diary_content_${formattedDate}_$index', _contentController.text);
-    await prefs.setString('diary_time_${formattedDate}_$index', formattedTime);
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(content: Text('저장되었습니다.')),
-    );
-
-    setState(() {
-      _entries.add({
+    final response = await http.post(
+      Uri.parse('http://10.0.2.2:3000/diaries'),
+      headers: {'Content-Type': 'application/json'},
+      body: json.encode({
         'title': _titleController.text,
         'content': _contentController.text,
+        'date': formattedDate,
         'time': formattedTime,
-      });
+      }),
+    );
+
+    if (response.statusCode == 201) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('저장되었습니다.')),
+      );
+      _loadSavedDiary();
       _titleController.clear();
       _contentController.clear();
-      _hasSavedData = true;
-    });
+    } else {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('저장에 실패했습니다.')),
+      );
+    }
   }
 
   Future<void> _deleteEntry(int index) async {
-    final prefs = await SharedPreferences.getInstance();
-    String formattedDate = DateFormat('yyyy.MM.dd').format(_selectedDate);
+    String id = _entries[index]['_id'];
 
-    await prefs.remove('diary_title_${formattedDate}_$index');
-    await prefs.remove('diary_content_${formattedDate}_$index');
-    await prefs.remove('diary_time_${formattedDate}_$index');
+    final response = await http.delete(
+      Uri.parse('http://10.0.2.2:3000/diaries/$id'),
+      headers: {'Content-Type': 'application/json'},
+    );
 
-    setState(() {
-      _entries.removeAt(index);
-      _hasSavedData = _entries.isNotEmpty;
-    });
+    if (response.statusCode == 200) {
+      setState(() {
+        _entries.removeAt(index);
+        _hasSavedData = _entries.isNotEmpty;
+      });
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('삭제되었습니다.')),
+      );
+    } else {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('삭제에 실패했습니다.')),
+      );
+    }
+  }
+
+  void _showDeleteConfirmationDialog(int index) {
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: Text('삭제 확인'),
+          content: Text('정말로 삭제하시겠습니까?'),
+          actions: <Widget>[
+            TextButton(
+              child: Text('취소'),
+              onPressed: () {
+                Navigator.of(context).pop();
+              },
+            ),
+            TextButton(
+              child: Text('삭제'),
+              onPressed: () {
+                Navigator.of(context).pop();
+                _deleteEntry(index);
+              },
+            ),
+          ],
+        );
+      },
+    );
+  }
+
+  void _showEditModalBottomSheet(int index) {
+    _titleController.text = _entries[index]['title'];
+    _contentController.text = _entries[index]['content'];
+    showModalBottomSheet(
+      context: context,
+      isScrollControlled: true,
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(25.0)),
+      ),
+      backgroundColor: Colors.white,
+      builder: (BuildContext context) {
+        return Padding(
+          padding: EdgeInsets.only(
+            bottom: MediaQuery.of(context).viewInsets.bottom,
+            top: 20,
+            left: 20,
+            right: 20,
+          ),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Text(
+                '일기 수정',
+                style: TextStyle(
+                  fontSize: 24,
+                  fontWeight: FontWeight.bold,
+                  fontFamily: 'AppleMyungjo',
+                  color: Colors.brown,
+                ),
+              ),
+              SizedBox(height: 20),
+              Container(
+                decoration: BoxDecoration(
+                  color: Colors.brown[50],
+                  borderRadius: BorderRadius.circular(10),
+                ),
+                child: Padding(
+                  padding: const EdgeInsets.all(8.0),
+                  child: TextField(
+                    controller: _titleController,
+                    decoration: InputDecoration(
+                      hintText: '제목',
+                      hintStyle: TextStyle(
+                        color: Colors.brown,
+                        fontSize: 20,
+                        fontFamily: 'AppleMyungjo',
+                      ),
+                      border: InputBorder.none,
+                    ),
+                    style: TextStyle(
+                      fontSize: 20,
+                      fontWeight: FontWeight.bold,
+                      fontFamily: 'AppleMyungjo',
+                      color: Colors.brown,
+                    ),
+                  ),
+                ),
+              ),
+              SizedBox(height: 10),
+              Container(
+                decoration: BoxDecoration(
+                  color: Colors.brown[50],
+                  borderRadius: BorderRadius.circular(10),
+                ),
+                child: Padding(
+                  padding: const EdgeInsets.all(8.0),
+                  child: TextField(
+                    controller: _contentController,
+                    decoration: InputDecoration(
+                      hintText: '내용을 입력하세요.',
+                      hintStyle: TextStyle(
+                        color: Colors.brown,
+                        fontSize: 18,
+                        fontFamily: 'AppleMyungjo',
+                      ),
+                      border: InputBorder.none,
+                    ),
+                    style: TextStyle(
+                      fontSize: 18,
+                      fontFamily: 'AppleMyungjo',
+                      color: Colors.brown,
+                    ),
+                    maxLines: 5,
+                  ),
+                ),
+              ),
+              SizedBox(height: 20),
+              ElevatedButton(
+                onPressed: () {
+                  _updateEntry(index);
+                  Navigator.of(context).pop();
+                },
+                child: Text('저장 완료', style: TextStyle(fontFamily: 'AppleMyungjo', color: Colors.black)),
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: Color(0xFFE5D0B5),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(20),
+                  ),
+                  padding: EdgeInsets.symmetric(horizontal: 30, vertical: 10),
+                ),
+              ),
+              SizedBox(height: 10),
+            ],
+          ),
+        );
+      },
+    );
+  }
+
+
+  Future<void> _updateEntry(int index) async {
+    String id = _entries[index]['_id'];
+
+    final response = await http.put(
+      Uri.parse('http://10.0.2.2:3000/diaries/$id'),
+      headers: {'Content-Type': 'application/json'},
+      body: json.encode({
+        'title': _titleController.text,
+        'content': _contentController.text,
+        'date': _entries[index]['date'],
+        'time': _entries[index]['time'],
+      }),
+    );
+
+    if (response.statusCode == 200) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('수정되었습니다.')),
+      );
+      _loadSavedDiary();
+    } else {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('수정에 실패했습니다.')),
+      );
+    }
   }
 
   void _changeDate(int days) {
@@ -128,21 +295,21 @@ class _DiaryScreenState extends State<DiaryScreen> {
 
   @override
   Widget build(BuildContext context) {
-    String formattedDate = DateFormat('yyyy. MM. dd').format(_selectedDate); // 날짜 형식 수정
+    String formattedDate = DateFormat('yyyy. MM. dd').format(_selectedDate);
 
     return Scaffold(
       backgroundColor: Colors.white,
       appBar: AppBar(
         title: Text(formattedDate),
         centerTitle: true,
-        elevation: 0, // AppBar의 그림자 제거
-        scrolledUnderElevation: 0, // 스크롤 시 그림자 제거
+        elevation: 0,
+        scrolledUnderElevation: 0,
         backgroundColor: Colors.white,
         leading: IconButton(
           padding: const EdgeInsets.only(left: 35.0),
           icon: Icon(Icons.arrow_back_ios, color: Colors.black),
           onPressed: () {
-            _changeDate(-1); // 날짜를 하루 줄입니다.
+            _changeDate(-1);
           },
         ),
         actions: [
@@ -150,7 +317,7 @@ class _DiaryScreenState extends State<DiaryScreen> {
             padding: const EdgeInsets.only(right: 35.0),
             icon: Icon(Icons.arrow_forward_ios, color: Colors.black),
             onPressed: () {
-              _changeDate(1); // 날짜를 하루 늘립니다.
+              _changeDate(1);
             },
           ),
         ],
@@ -174,7 +341,7 @@ class _DiaryScreenState extends State<DiaryScreen> {
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
                         Text(
-                          _entries[index]['title']!,
+                          _entries[index]['title'],
                           style: TextStyle(
                             fontSize: 20,
                             fontWeight: FontWeight.bold,
@@ -185,7 +352,7 @@ class _DiaryScreenState extends State<DiaryScreen> {
                           children: [
                             TextButton(
                               onPressed: () {
-                                // 수정 기능 구현
+                                _showEditModalBottomSheet(index);
                               },
                               child: Text(
                                 '수정',
@@ -196,7 +363,7 @@ class _DiaryScreenState extends State<DiaryScreen> {
                               ),
                             ),
                             TextButton(
-                              onPressed: () => _deleteEntry(index),
+                              onPressed: () => _showDeleteConfirmationDialog(index),
                               child: Text(
                                 '삭제',
                                 style: TextStyle(
@@ -211,7 +378,7 @@ class _DiaryScreenState extends State<DiaryScreen> {
                     ),
                     SizedBox(height: 20.0),
                     Text(
-                      '${DateFormat('yyyy년 M월 d일').format(_selectedDate)} ${_entries[index]['time']!}',
+                      '${DateFormat('yyyy년 M월 d일').format(_selectedDate)} ${_entries[index]['time']}',
                       style: TextStyle(
                         color: Colors.grey,
                         fontSize: 14,
@@ -220,7 +387,7 @@ class _DiaryScreenState extends State<DiaryScreen> {
                     ),
                     SizedBox(height: 20.0),
                     Text(
-                      _entries[index]['content']!,
+                      _entries[index]['content'],
                       style: TextStyle(
                         fontSize: 18,
                         fontFamily: 'AppleMyungjo',
