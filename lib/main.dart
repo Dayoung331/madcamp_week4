@@ -1,11 +1,13 @@
 import 'package:flutter/material.dart';
+import 'package:intl/date_symbol_data_local.dart'; // 로케일 초기화
 import 'package:madcamp_week4/screens/question_screen.dart';
 import 'package:madcamp_week4/screens/diary_screen.dart';
 import 'package:madcamp_week4/screens/calendar_screen.dart';
-import 'package:intl/intl.dart';
 
 void main() {
-  runApp(MyApp());
+  initializeDateFormatting('ko_KR', null).then((_) { // 로케일 초기화
+    runApp(MyApp());
+  });
 }
 
 class MyApp extends StatelessWidget {
@@ -25,7 +27,6 @@ class MainScreen extends StatefulWidget {
 
 class _MainScreenState extends State<MainScreen> {
   int _selectedIndex = 0;
-  DateTime _selectedDate = DateTime.now();
 
   static List<Widget> _widgetOptions = <Widget>[
     QuestionScreen(),
