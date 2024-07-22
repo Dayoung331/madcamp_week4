@@ -1,9 +1,9 @@
-import 'dart:convert';
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart' show rootBundle;
-import 'package:intl/intl.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'dart:convert';
 import 'past_answers_screen.dart';
+import 'package:intl/intl.dart';
+import 'package:flutter/services.dart';
 
 class QuestionScreen extends StatefulWidget {
   @override
@@ -100,6 +100,7 @@ class _QuestionScreenState extends State<QuestionScreen> {
           _isAnswerSubmitted = true;
         });
         print("Answer submitted: $answer for date: $dateKey");
+        _showSnackbar("답변이 제출되었습니다!"); // Snackbar 표시
       }
     }
   }
@@ -127,6 +128,7 @@ class _QuestionScreenState extends State<QuestionScreen> {
                 });
                 Navigator.of(context).pop();
                 print("Answer resubmitted: $newAnswer for date: $dateKey");
+                _showSnackbar("답변이 제출되었습니다!"); // Snackbar 표시
               },
               child: Text('예'),
             ),
@@ -134,6 +136,14 @@ class _QuestionScreenState extends State<QuestionScreen> {
         );
       },
     );
+  }
+
+  void _showSnackbar(String message) {
+    final snackBar = SnackBar(
+      content: Text(message),
+      duration: Duration(seconds: 1),
+    );
+    ScaffoldMessenger.of(context).showSnackBar(snackBar);
   }
 
   Future<void> _updateSubmittedStatus(String dateKey) async {
@@ -187,14 +197,15 @@ class _QuestionScreenState extends State<QuestionScreen> {
         ),
         centerTitle: true,
       ),
-      body: Padding(
+      body: SingleChildScrollView(
         padding: const EdgeInsets.all(16.0),
         child: Column(
-          crossAxisAlignment: CrossAxisAlignment.center,
+          mainAxisAlignment: MainAxisAlignment.start, // 상단 정렬
           children: [
             SizedBox(height: 20),
             Container(
               width: 300,
+              height: 100,
               alignment: Alignment.center,
               decoration: BoxDecoration(
                 color: Colors.transparent,
@@ -213,31 +224,27 @@ class _QuestionScreenState extends State<QuestionScreen> {
               ),
             ),
             SizedBox(height: 20),
-            Expanded(
+            SizedBox(
+              height: 300, // 고정된 높이 설정
               child: TextField(
                 controller: _answerController,
-                maxLines: null,
-                expands: true,
+                maxLines: 10,
                 decoration: InputDecoration(
                   border: OutlineInputBorder(),
                   hintText: '답변',
+                  hintStyle: TextStyle(
+                    fontFamily: 'NotoSerifKR',
+                  ),
                 ),
               ),
             ),
-          ],
-        ),
-      ),
-      bottomNavigationBar: Padding(
-        padding: const EdgeInsets.all(16.0),
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
+            SizedBox(height: 10),
             ElevatedButton(
               onPressed: _submitAnswer,
               style: ElevatedButton.styleFrom(
                 foregroundColor: Colors.white,
                 backgroundColor: _isAnswerSubmitted ? Colors.green : Colors.grey,
-                padding: EdgeInsets.symmetric(horizontal: 50, vertical: 15),
+                padding: EdgeInsets.symmetric(horizontal: 30, vertical: 10), // 버튼 크기 조정
               ),
               child: Row(
                 mainAxisSize: MainAxisSize.min,
@@ -253,7 +260,7 @@ class _QuestionScreenState extends State<QuestionScreen> {
                 ],
               ),
             ),
-            SizedBox(height: 10),
+            SizedBox(height: 120), // 여기에 여백 추가
             ElevatedButton(
               onPressed: () async {
                 String dateKey = DateFormat('MMdd').format(_currentDate);
@@ -267,13 +274,15 @@ class _QuestionScreenState extends State<QuestionScreen> {
                   ),
                 );
                 if (shouldUpdate == true) {
+                  await _loadAnswers(); // 삭제 후 상태를 다시 로드
                   await _updateSubmittedStatus(dateKey);
                 }
               },
               style: ElevatedButton.styleFrom(
                 foregroundColor: Colors.white,
                 backgroundColor: Colors.grey,
-                padding: EdgeInsets.symmetric(horizontal: 50, vertical: 15),
+                padding: EdgeInsets.symmetric(horizontal: 130, vertical: 15),
+                minimumSize: Size(250, 50), // 버튼의 최소 크기 설정
               ),
               child: Text(
                 '과거의 나 돌아보기',
