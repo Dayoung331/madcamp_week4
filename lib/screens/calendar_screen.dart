@@ -3,7 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:table_calendar/table_calendar.dart';
 import 'package:intl/intl.dart';
-import 'package:http/http.dart' as http;
+import 'past_answers_screen.dart';
 
 class CalendarScreen extends StatefulWidget {
   final Function(DateTime) onDateSelected;
@@ -17,6 +17,7 @@ class CalendarScreen extends StatefulWidget {
 class _CalendarScreenState extends State<CalendarScreen> {
   Map<DateTime, List<String>> _events = {};
   Map<String, bool> _isAnswerSubmittedMap = {};
+  Map<String, Map<String, String>> _answers = {}; // 날짜별 답변을 저장하는 맵
   DateTime _focusedDay = DateTime.now();
   DateTime? _selectedDay;
   List<String> _selectedEvents = [];
@@ -25,6 +26,7 @@ class _CalendarScreenState extends State<CalendarScreen> {
   void initState() {
     super.initState();
     _loadSubmittedStatus();
+    _loadAnswers(); // 저장된 답변을 불러옵니다.
     _printStoredData();
     _loadDiaryEntries();
     Intl.defaultLocale = 'ko_KR'; // 기본 로케일을 한국어로 설정
@@ -52,14 +54,31 @@ class _CalendarScreenState extends State<CalendarScreen> {
     }
   }
 
-  Future<void> _loadDiaryEntries() async {
-    final response = await http.get(Uri.parse('http://10.0.2.2:3000/diaries'));
+  Future<void> _loadAnswers() async {
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    String? answersString = prefs.getString('answers');
+    if (answersString != null) {
+      Map<String, dynamic> decodedAnswers = json.decode(answersString);
+      Map<String, Map<String, String>> loadedAnswers = {};
+      decodedAnswers.forEach((key, value) {
+        loadedAnswers[key] = Map<String, String>.from(value);
+      });
+      setState(() {
+        _answers = loadedAnswers;
+      });
+    }
+    print("Answers loaded: $_answers");
+  }
 
-    if (response.statusCode == 200) {
-      List<dynamic> decodedEntries = json.decode(response.body);
-      decodedEntries.forEach((entry) {
+  Future<void> _loadDiaryEntries() async {
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    Set<String> keys = prefs.getKeys();
+
+    keys.forEach((key) {
+      if (key.startsWith('diary_written_')) {
+        String dateString = key.replaceFirst('diary_written_', '');
         try {
-          DateTime date = DateTime.parse(entry['date']);
+          DateTime date = DateFormat('yyyy.MM.dd').parse(dateString);
           date = DateTime.utc(date.year, date.month, date.day);
           setState(() {
             if (_events[date] == null) {
@@ -70,9 +89,9 @@ class _CalendarScreenState extends State<CalendarScreen> {
         } catch (e) {
           print("Error parsing date: $e");
         }
-      });
-      print("Loaded Diary Entries: $_events");
-    }
+      }
+    });
+    print("Loaded Diary Entries: $_events");
   }
 
   void _populateEvents() {
@@ -300,11 +319,16 @@ class _CalendarScreenState extends State<CalendarScreen> {
                   color: event == 'Submitted' ? Colors.blue : Colors.green,
                   date: _selectedDay ?? DateTime.now(), // 선택된 날짜를 전달
                   onTap: () {
-                    // 다른 화면으로 이동할 때 Navigator 사용
+                    // dateKey를 생성
+                    String dateKey = DateFormat('MMdd').format(_selectedDay ?? DateTime.now());
+                    // PastAnswersScreen으로 이동
                     Navigator.push(
                       context,
                       MaterialPageRoute(
-                        builder: (context) => EventDetailScreen(event: event),
+                        builder: (context) => PastAnswersScreen(
+                          dateKey: dateKey,
+                          answers: _answers[dateKey] ?? {},
+                        ),
                       ),
                     );
                   },
@@ -372,25 +396,6 @@ class ScheduleCard extends StatelessWidget {
           ),
           trailing: Icon(Icons.arrow_forward_ios, color: color), // 오른쪽에 아이콘 추가 및 색상 설정
         ),
-      ),
-    );
-  }
-}
-
-
-class EventDetailScreen extends StatelessWidget {
-  final String event;
-
-  EventDetailScreen({required this.event});
-
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        title: Text('Event Details'),
-      ),
-      body: Center(
-        child: Text('Details for $event'),
       ),
     );
   }
