@@ -175,6 +175,7 @@ class _QuestionScreenState extends State<QuestionScreen> {
     return Scaffold(
       appBar: AppBar(
         backgroundColor: Colors.white,
+        scrolledUnderElevation: 0,
         title: Row(
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
@@ -187,6 +188,7 @@ class _QuestionScreenState extends State<QuestionScreen> {
             ),
             Text(
               DateFormat('yyyy. MM. dd').format(_currentDate),
+              style: TextStyle(color: Colors.black, fontSize: 20),
             ),
             IconButton(
               padding: const EdgeInsets.only(right: 15.0),
@@ -198,6 +200,8 @@ class _QuestionScreenState extends State<QuestionScreen> {
           ],
         ),
         centerTitle: true,
+        elevation: 0,
+        toolbarHeight: 140, // AppBar height 설정
       ),
       backgroundColor: Colors.white,
       body: SingleChildScrollView(
@@ -205,7 +209,10 @@ class _QuestionScreenState extends State<QuestionScreen> {
         child: Column(
           mainAxisAlignment: MainAxisAlignment.start, // 상단 정렬
           children: [
-            SizedBox(height: 20),
+            Align(
+              alignment: Alignment.centerLeft,
+              child: Icon(Icons.format_quote, size: 30, color: Colors.black),
+            ),
             Container(
               width: 300,
               height: 100,
@@ -215,7 +222,7 @@ class _QuestionScreenState extends State<QuestionScreen> {
                 border: Border.all(color: Colors.transparent),
               ),
               child: Text(
-                '“$question”',
+                '$question',
                 textAlign: TextAlign.center,
                 style: TextStyle(
                   fontSize: 18,
@@ -226,14 +233,23 @@ class _QuestionScreenState extends State<QuestionScreen> {
                 overflow: TextOverflow.visible,
               ),
             ),
+            Align(
+              alignment: Alignment.centerRight,
+              child: Icon(Icons.format_quote, size: 30, color: Colors.black),
+            ),
             SizedBox(height: 20),
-            SizedBox(
-              height: 300, // 고정된 높이 설정
+            Container(
+              width: 320,
+              padding: const EdgeInsets.all(20.0),
+              decoration: BoxDecoration(
+                border: Border.all(color: Colors.black),
+                borderRadius: BorderRadius.circular(12),
+              ),
               child: TextField(
                 controller: _answerController,
                 maxLines: 10,
                 decoration: InputDecoration(
-                  border: OutlineInputBorder(),
+                  border: InputBorder.none,
                   hintText: '답변',
                   hintStyle: TextStyle(
                     fontFamily: 'NotoSerifKR',
@@ -263,7 +279,7 @@ class _QuestionScreenState extends State<QuestionScreen> {
                 ],
               ),
             ),
-            SizedBox(height: 120), // 여기에 여백 추가
+            SizedBox(height: 10),
             ElevatedButton(
               onPressed: () async {
                 String dateKey = DateFormat('MMdd').format(_currentDate);
@@ -284,7 +300,7 @@ class _QuestionScreenState extends State<QuestionScreen> {
               style: ElevatedButton.styleFrom(
                 foregroundColor: Colors.white,
                 backgroundColor: Colors.grey,
-                padding: EdgeInsets.symmetric(horizontal: 130, vertical: 15),
+                padding: EdgeInsets.symmetric(horizontal: 100, vertical: 15),
                 minimumSize: Size(250, 50), // 버튼의 최소 크기 설정
               ),
               child: Text(

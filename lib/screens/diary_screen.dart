@@ -196,11 +196,12 @@ class _DiaryScreenState extends State<DiaryScreen> {
     return Scaffold(
       backgroundColor: Colors.white,
       appBar: AppBar(
-        title: Text(formattedDate),
+        title: Text(formattedDate, style: TextStyle(fontSize: 20)),
         centerTitle: true,
         elevation: 0,
         scrolledUnderElevation: 0,
         backgroundColor: Colors.white,
+        toolbarHeight: 130,
         leading: IconButton(
           padding: const EdgeInsets.only(left: 35.0),
           icon: Icon(Icons.arrow_back_ios, color: Colors.black),
