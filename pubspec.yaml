@@ -34,6 +34,7 @@ dependencies:
   shared_preferences: ^2.0.13
   http: ^1.2.2
   flutter_picker: ^2.1.0
+  lottie: ^3.1.2
 
   # The following adds the Cupertino Icons font to your application.
   # Use with the CupertinoIcons class for iOS style icons.
@@ -90,6 +91,7 @@ flutter:
     - assets/images/question.png
     - assets/images/calendar_diary.png
     - assets/images/calendar_question_and_answer.png
+    - assets/Animation_send.json
 
   # An image asset can refer to one or more resolution-specific "variants", see
   # https://flutter.dev/assets-and-images/#resolution-aware

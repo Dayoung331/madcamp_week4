@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:lottie/lottie.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'dart:convert';
 import 'past_answers_screen.dart';
@@ -16,6 +17,7 @@ class _QuestionScreenState extends State<QuestionScreen> {
   Map<String, Map<String, String>> _answers = {}; // 날짜별 답변을 저장하는 맵
   Map<String, bool> _isAnswerSubmittedMap = {}; // 날짜별 답변 제출 상태를 저장하는 맵
   TextEditingController _answerController = TextEditingController();
+  bool _showAnimation = false;
 
   bool get _isAnswerSubmitted => _isAnswerSubmittedMap[DateFormat('MMdd').format(_currentDate)] ?? false;
   set _isAnswerSubmitted(bool value) => _isAnswerSubmittedMap[DateFormat('MMdd').format(_currentDate)] = value;
@@ -88,6 +90,7 @@ class _QuestionScreenState extends State<QuestionScreen> {
   }
 
   void _submitAnswer() {
+    FocusScope.of(context).unfocus(); // 키보드를 숨김
     String answer = _answerController.text;
     if (answer.isNotEmpty) {
       String dateKey = DateFormat('MMdd').format(_currentDate);
@@ -96,13 +99,27 @@ class _QuestionScreenState extends State<QuestionScreen> {
       } else {
         _saveAnswer(dateKey, answer);
         _answerController.clear();
+        FocusScope.of(context).unfocus();
         setState(() {
           _isAnswerSubmitted = true;
         });
         print("Answer submitted: $answer for date: $dateKey");
-        _showSnackbar("답변이 제출되었습니다!"); // Snackbar 표시
+        _showSnackbar("답변이 제출되었습니다!");
+        _showRevealAnimation();
       }
     }
+  }
+
+  void _showRevealAnimation() {
+    setState(() {
+      _showAnimation = true;
+    });
+
+    Future.delayed(Duration(seconds: 2), () {
+      setState(() {
+        _showAnimation = false;
+      });
+    });
   }
 
   void _showConfirmationDialog(String dateKey, String newAnswer) {
@@ -129,6 +146,7 @@ class _QuestionScreenState extends State<QuestionScreen> {
                 Navigator.of(context).pop();
                 print("Answer resubmitted: $newAnswer for date: $dateKey");
                 _showSnackbar("답변이 제출되었습니다!"); // Snackbar 표시
+                _showRevealAnimation(); // 애니메이션 실행
               },
               child: Text('예'),
             ),
@@ -140,8 +158,19 @@ class _QuestionScreenState extends State<QuestionScreen> {
 
   void _showSnackbar(String message) {
     final snackBar = SnackBar(
-      content: Text(message),
-      duration: Duration(seconds: 1),
+        content: Row(
+          children: [
+            Icon(Icons.check_circle, color: Color(0xFFE5D0B5)),
+            SizedBox(width: 8.0),
+            Text(message),
+          ],
+        ),
+        backgroundColor: Colors.grey[600],
+        behavior: SnackBarBehavior.floating,
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(10),
+        ),
+        duration: Duration(seconds: 2),
     );
     ScaffoldMessenger.of(context).showSnackBar(snackBar);
   }
@@ -201,115 +230,142 @@ class _QuestionScreenState extends State<QuestionScreen> {
         ),
         centerTitle: true,
         elevation: 0,
-        toolbarHeight: 140, // AppBar height 설정
+        toolbarHeight: 120, // AppBar height 설정
       ),
       backgroundColor: Colors.white,
-      body: SingleChildScrollView(
-        padding: const EdgeInsets.all(16.0),
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.start, // 상단 정렬
+      body: GestureDetector(
+        onTap: () {
+          FocusScope.of(context).unfocus(); // 텍스트 필드 이외의 영역을 클릭하면 키보드를 닫음
+        },
+        child: Stack(
           children: [
-            Align(
-              alignment: Alignment.centerLeft,
-              child: Icon(Icons.format_quote, size: 30, color: Colors.black),
-            ),
-            Container(
-              width: 300,
-              height: 100,
-              alignment: Alignment.center,
-              decoration: BoxDecoration(
-                color: Colors.transparent,
-                border: Border.all(color: Colors.transparent),
-              ),
-              child: Text(
-                '$question',
-                textAlign: TextAlign.center,
-                style: TextStyle(
-                  fontSize: 18,
-                  fontStyle: FontStyle.italic,
-                  fontFamily: 'NotoSerifKR',
-                ),
-                softWrap: true,
-                overflow: TextOverflow.visible,
-              ),
-            ),
-            Align(
-              alignment: Alignment.centerRight,
-              child: Icon(Icons.format_quote, size: 30, color: Colors.black),
-            ),
-            SizedBox(height: 20),
-            Container(
-              width: 320,
-              padding: const EdgeInsets.all(20.0),
-              decoration: BoxDecoration(
-                border: Border.all(color: Colors.black),
-                borderRadius: BorderRadius.circular(12),
-              ),
-              child: TextField(
-                controller: _answerController,
-                maxLines: 10,
-                decoration: InputDecoration(
-                  border: InputBorder.none,
-                  hintText: '답변',
-                  hintStyle: TextStyle(
-                    fontFamily: 'NotoSerifKR',
-                  ),
-                ),
-              ),
-            ),
-            SizedBox(height: 10),
-            ElevatedButton(
-              onPressed: _submitAnswer,
-              style: ElevatedButton.styleFrom(
-                foregroundColor: Colors.white,
-                backgroundColor: _isAnswerSubmitted ? Colors.green : Colors.grey,
-                padding: EdgeInsets.symmetric(horizontal: 30, vertical: 10), // 버튼 크기 조정
-              ),
-              child: Row(
-                mainAxisSize: MainAxisSize.min,
+            SingleChildScrollView(
+              padding: const EdgeInsets.all(16.0),
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.start, // 상단 정렬
                 children: [
-                  Icon(Icons.check),
-                  SizedBox(width: 10),
-                  Text(
-                    '답변 제출',
-                    style: TextStyle(
-                      fontFamily: 'NotoSerifKR',
+                  Align(
+                    alignment: Alignment.centerLeft,
+                    child: Padding(
+                      padding: EdgeInsets.only(left: 16.0),
+                      child: Transform.rotate(
+                        angle: 180 * 3.1415927 / 180,
+                        child: Icon(Icons.format_quote, size: 30, color: Colors.black),
+                      ),
+                    )
+                  ),
+                  Container(
+                    width: 250,
+                    height: 100,
+                    alignment: Alignment.center,
+                    decoration: BoxDecoration(
+                      color: Colors.transparent,
+                      border: Border.all(color: Colors.transparent),
+                    ),
+                    child: Text(
+                      '$question',
+                      textAlign: TextAlign.center,
+                      style: TextStyle(
+                        fontSize: 18,
+                        fontStyle: FontStyle.italic,
+                        fontFamily: 'NotoSerifKR',
+                      ),
+                      softWrap: true,
+                      overflow: TextOverflow.visible,
+                    ),
+                  ),
+                  Align(
+                    alignment: Alignment.centerRight,
+                    child: Padding(
+                      padding: EdgeInsets.only(right: 16.0),
+                      child: Icon(Icons.format_quote, size: 30, color: Colors.black),
+                    )
+                  ),
+                  SizedBox(height: 20),
+                  Container(
+                    width: 320,
+                    padding: const EdgeInsets.all(20.0),
+                    decoration: BoxDecoration(
+                      border: Border.all(color: Colors.black),
+                      borderRadius: BorderRadius.circular(12),
+                    ),
+                    child: TextField(
+                      controller: _answerController,
+                      maxLines: 10,
+                      decoration: InputDecoration(
+                        border: InputBorder.none,
+                        hintText: '답변',
+                        hintStyle: TextStyle(
+                          fontFamily: 'NotoSerifKR',
+                        ),
+                      ),
+                    ),
+                  ),
+                  SizedBox(height: 20),
+                  ElevatedButton(
+                    onPressed: _submitAnswer,
+                    style: ElevatedButton.styleFrom(
+                      foregroundColor: Colors.white,
+                      backgroundColor: _isAnswerSubmitted ? Colors.green : Colors.grey,
+                      padding: EdgeInsets.symmetric(horizontal: 30, vertical: 10), // 버튼 크기 조정
+                    ),
+                    child: Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        Icon(Icons.check),
+                        SizedBox(width: 10),
+                        Text(
+                          '답변 제출',
+                          style: TextStyle(
+                            fontFamily: 'NotoSerifKR',
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                  SizedBox(height: 20),
+                  ElevatedButton(
+                    onPressed: () async {
+                      String dateKey = DateFormat('MMdd').format(_currentDate);
+                      bool shouldUpdate = await Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (context) => PastAnswersScreen(
+                            dateKey: dateKey,
+                            answers: _answers[dateKey] ?? {},
+                          ),
+                        ),
+                      );
+                      if (shouldUpdate == true) {
+                        await _loadAnswers(); // 삭제 후 상태를 다시 로드
+                        await _updateSubmittedStatus(dateKey);
+                      }
+                    },
+                    style: ElevatedButton.styleFrom(
+                      foregroundColor: Colors.white,
+                      backgroundColor: Colors.grey,
+                      padding: EdgeInsets.symmetric(horizontal: 100, vertical: 15),
+                      minimumSize: Size(250, 50), // 버튼의 최소 크기 설정
+                    ),
+                    child: Text(
+                      '과거의 나 돌아보기',
+                      style: TextStyle(
+                        fontFamily: 'NotoSerifKR',
+                      ),
                     ),
                   ),
                 ],
               ),
             ),
-            SizedBox(height: 10),
-            ElevatedButton(
-              onPressed: () async {
-                String dateKey = DateFormat('MMdd').format(_currentDate);
-                bool shouldUpdate = await Navigator.push(
-                  context,
-                  MaterialPageRoute(
-                    builder: (context) => PastAnswersScreen(
-                      dateKey: dateKey,
-                      answers: _answers[dateKey] ?? {},
-                    ),
-                  ),
-                );
-                if (shouldUpdate == true) {
-                  await _loadAnswers(); // 삭제 후 상태를 다시 로드
-                  await _updateSubmittedStatus(dateKey);
-                }
-              },
-              style: ElevatedButton.styleFrom(
-                foregroundColor: Colors.white,
-                backgroundColor: Colors.grey,
-                padding: EdgeInsets.symmetric(horizontal: 100, vertical: 15),
-                minimumSize: Size(250, 50), // 버튼의 최소 크기 설정
-              ),
-              child: Text(
-                '과거의 나 돌아보기',
-                style: TextStyle(
-                  fontFamily: 'NotoSerifKR',
+            if (_showAnimation)
+              Center(
+                child: Lottie.asset(
+                  'assets/Animation_send.json',
+                  width: 200,
+                  height: 200,
+                  fit: BoxFit.fill,
                 ),
               ),
-            ),
           ],
         ),
       ),

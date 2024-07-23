@@ -22,7 +22,7 @@ class EntryList extends StatelessWidget {
         return Card(
           color: Colors.white,
           elevation: 0,
-          margin: EdgeInsets.symmetric(vertical: 16.0, horizontal: 8.0),
+          margin: EdgeInsets.only(left: 8.0, right: 8.0, bottom: 16.0),
           child: Padding(
             padding: const EdgeInsets.all(16.0),
             child: Column(
