@@ -4,6 +4,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'package:table_calendar/table_calendar.dart';
 import 'package:intl/intl.dart';
 import 'past_answers_screen.dart';
+import 'diary_screen.dart';
 
 class CalendarScreen extends StatefulWidget {
   final Function(DateTime) onDateSelected;
@@ -78,7 +79,7 @@ class _CalendarScreenState extends State<CalendarScreen> {
       if (key.startsWith('diary_written_')) {
         String dateString = key.replaceFirst('diary_written_', '');
         try {
-          DateTime date = DateFormat('yyyy.MM.dd').parse(dateString);
+          DateTime date = DateFormat('yyyy-MM-dd').parse(dateString);
           date = DateTime.utc(date.year, date.month, date.day);
           setState(() {
             if (_events[date] == null) {
@@ -115,6 +116,15 @@ class _CalendarScreenState extends State<CalendarScreen> {
       _selectedEvents = _events[selectedDay] ?? [];
     });
     widget.onDateSelected(selectedDay);
+  }
+
+  void _navigateToDiary(DateTime date) {
+    Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (context) => DiaryScreen(initialDate: date),
+      ),
+    );
   }
 
   @override
@@ -293,7 +303,7 @@ class _CalendarScreenState extends State<CalendarScreen> {
                             height: 15, // 이미지 높이 설정
                             margin: EdgeInsets.symmetric(horizontal: 1.5),
                             child: Image.asset(
-                              event == 'Submitted' ? 'assets/images/calendar_diary.png' : 'assets/images/calendar_question_and_answer.png', // 이미지 파일 경로 설정
+                              event == 'Submitted' ? 'assets/images/calendar_question_and_answer.png' : 'assets/images/calendar_diary.png', // 이미지 파일 경로 설정
                               fit: BoxFit.cover, // 이미지 비율에 맞게 조정
                             ),
                           );
@@ -319,18 +329,22 @@ class _CalendarScreenState extends State<CalendarScreen> {
                   color: event == 'Submitted' ? Colors.blue : Colors.green,
                   date: _selectedDay ?? DateTime.now(), // 선택된 날짜를 전달
                   onTap: () {
-                    // dateKey를 생성
-                    String dateKey = DateFormat('MMdd').format(_selectedDay ?? DateTime.now());
-                    // PastAnswersScreen으로 이동
-                    Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                        builder: (context) => PastAnswersScreen(
-                          dateKey: dateKey,
-                          answers: _answers[dateKey] ?? {},
+                    if (event == 'Diary Entry') {
+                      _navigateToDiary(_selectedDay ?? DateTime.now());
+                    } else {
+                      // dateKey를 생성
+                      String dateKey = DateFormat('MMdd').format(_selectedDay ?? DateTime.now());
+                      // PastAnswersScreen으로 이동
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (context) => PastAnswersScreen(
+                            dateKey: dateKey,
+                            answers: _answers[dateKey] ?? {},
+                          ),
                         ),
-                      ),
-                    );
+                      );
+                    }
                   },
                 );
               },
