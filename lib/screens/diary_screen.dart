@@ -20,6 +20,10 @@ class MyApp extends StatelessWidget {
 }
 
 class DiaryScreen extends StatefulWidget {
+  final DateTime? initialDate;
+
+  DiaryScreen({this.initialDate});
+
   @override
   _DiaryScreenState createState() => _DiaryScreenState();
 }
@@ -34,6 +38,9 @@ class _DiaryScreenState extends State<DiaryScreen> {
   @override
   void initState() {
     super.initState();
+    if (widget.initialDate != null) {
+      _selectedDate = widget.initialDate!;
+    }
     _loadSavedDiary();
   }
 
@@ -81,6 +88,10 @@ class _DiaryScreenState extends State<DiaryScreen> {
     SharedPreferences prefs = await SharedPreferences.getInstance();
     prefs.setString(formattedDate, json.encode(_entries));
 
+    // 일기 작성 여부를 SharedPreferences에 저장
+    String diaryWrittenKey = 'diary_written_$formattedDate';
+    prefs.setBool(diaryWrittenKey, true);
+
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(content: Text('저장되었습니다.')),
     );
@@ -98,6 +109,12 @@ class _DiaryScreenState extends State<DiaryScreen> {
     SharedPreferences prefs = await SharedPreferences.getInstance();
     String formattedDate = DateFormat('yyyy-MM-dd').format(_selectedDate);
     prefs.setString(formattedDate, json.encode(_entries));
+
+    // 일기 삭제 시 일기가 남아있는지 확인
+    if (_entries.isEmpty) {
+      String diaryWrittenKey = 'diary_written_$formattedDate';
+      prefs.remove(diaryWrittenKey);
+    }
 
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(content: Text('삭제되었습니다.')),
