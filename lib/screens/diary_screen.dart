@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
-import 'package:http/http.dart' as http;
+import 'package:shared_preferences/shared_preferences.dart';
 import 'dart:convert';
 import 'entry_form.dart';
 import 'entry_list.dart';
@@ -38,12 +38,13 @@ class _DiaryScreenState extends State<DiaryScreen> {
   }
 
   Future<void> _loadSavedDiary() async {
+    SharedPreferences prefs = await SharedPreferences.getInstance();
     String formattedDate = DateFormat('yyyy-MM-dd').format(_selectedDate);
-    final response = await http.get(Uri.parse('http://10.0.2.2:3000/diaries/$formattedDate'));
+    String? savedDiary = prefs.getString(formattedDate);
 
-    if (response.statusCode == 200) {
+    if (savedDiary != null) {
       setState(() {
-        _entries = List<Map<String, dynamic>>.from(json.decode(response.body));
+        _entries = List<Map<String, dynamic>>.from(json.decode(savedDiary));
         _hasSavedData = _entries.isNotEmpty;
       });
     } else {
@@ -55,9 +56,6 @@ class _DiaryScreenState extends State<DiaryScreen> {
   }
 
   Future<void> _saveDiary() async {
-    print('Title: ${_titleController.text}');
-    print('Content: ${_contentController.text}');
-
     if (_titleController.text.isEmpty || _contentController.text.isEmpty) {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(content: Text('제목 또는 내용을 입력해주세요')),
@@ -68,55 +66,42 @@ class _DiaryScreenState extends State<DiaryScreen> {
     String formattedDate = DateFormat('yyyy-MM-dd').format(_selectedDate);
     String formattedTime = DateFormat('a hh:mm').format(DateTime.now());
 
-    final response = await http.post(
-      Uri.parse('http://10.0.2.2:3000/diaries'),
-      headers: {'Content-Type': 'application/json'},
-      body: json.encode({
-        'title': _titleController.text,
-        'content': _contentController.text,
-        'date': formattedDate,
-        'time': formattedTime,
-      }),
+    Map<String, dynamic> newEntry = {
+      'title': _titleController.text,
+      'content': _contentController.text,
+      'date': formattedDate,
+      'time': formattedTime,
+    };
+
+    setState(() {
+      _entries.add(newEntry);
+      _hasSavedData = true;
+    });
+
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    prefs.setString(formattedDate, json.encode(_entries));
+
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(content: Text('저장되었습니다.')),
     );
 
-    if (response.statusCode == 201) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('저장되었습니다.')),
-      );
-      setState(() {
-        _loadSavedDiary();
-        _titleController.clear();
-        _contentController.clear();
-        _hasSavedData = false; // 상태를 초기화합니다.
-      });
-    } else {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('저장에 실패했습니다.')),
-      );
-    }
+    _titleController.clear();
+    _contentController.clear();
   }
 
   Future<void> _deleteEntry(int index) async {
-    String id = _entries[index]['_id'];
+    setState(() {
+      _entries.removeAt(index);
+      _hasSavedData = _entries.isNotEmpty;
+    });
 
-    final response = await http.delete(
-      Uri.parse('http://10.0.2.2:3000/diaries/$id'),
-      headers: {'Content-Type': 'application/json'},
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    String formattedDate = DateFormat('yyyy-MM-dd').format(_selectedDate);
+    prefs.setString(formattedDate, json.encode(_entries));
+
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(content: Text('삭제되었습니다.')),
     );
-
-    if (response.statusCode == 200) {
-      setState(() {
-        _entries.removeAt(index);
-        _hasSavedData = _entries.isNotEmpty;
-      });
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('삭제되었습니다.')),
-      );
-    } else {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('삭제에 실패했습니다.')),
-      );
-    }
   }
 
   void _showDeleteConfirmationDialog(int index) {
@@ -170,29 +155,20 @@ class _DiaryScreenState extends State<DiaryScreen> {
   }
 
   Future<void> _updateEntry(int index) async {
-    String id = _entries[index]['_id'];
+    setState(() {
+      _entries[index]['title'] = _titleController.text;
+      _entries[index]['content'] = _contentController.text;
+    });
 
-    final response = await http.put(
-      Uri.parse('http://10.0.2.2:3000/diaries/$id'),
-      headers: {'Content-Type': 'application/json'},
-      body: json.encode({
-        'title': _titleController.text,
-        'content': _contentController.text,
-        'date': _entries[index]['date'],
-        'time': _entries[index]['time'],
-      }),
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    String formattedDate = DateFormat('yyyy-MM-dd').format(_selectedDate);
+    prefs.setString(formattedDate, json.encode(_entries));
+
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(content: Text('수정되었습니다.')),
     );
 
-    if (response.statusCode == 200) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('수정되었습니다.')),
-      );
-      _loadSavedDiary();
-    } else {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('수정에 실패했습니다.')),
-      );
-    }
+    _loadSavedDiary();
   }
 
   void _changeDate(int days) {
@@ -277,7 +253,8 @@ class _DiaryScreenState extends State<DiaryScreen> {
             Divider(color: Colors.grey, thickness: 1),
             Expanded(
               child: Padding(
-                padding: const EdgeInsets.symmetric(vertical: 8.0, horizontal: 8.0),
+                padding: const EdgeInsets.symmetric(
+                    vertical: 8.0, horizontal: 8.0),
                 child: TextField(
                   controller: _contentController,
                   decoration: InputDecoration(
