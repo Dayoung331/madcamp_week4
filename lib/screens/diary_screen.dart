@@ -55,6 +55,9 @@ class _DiaryScreenState extends State<DiaryScreen> {
   }
 
   Future<void> _saveDiary() async {
+    print('Title: ${_titleController.text}');
+    print('Content: ${_contentController.text}');
+
     if (_titleController.text.isEmpty || _contentController.text.isEmpty) {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(content: Text('제목 또는 내용을 입력해주세요')),
@@ -80,9 +83,12 @@ class _DiaryScreenState extends State<DiaryScreen> {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(content: Text('저장되었습니다.')),
       );
-      _loadSavedDiary();
-      _titleController.clear();
-      _contentController.clear();
+      setState(() {
+        _loadSavedDiary();
+        _titleController.clear();
+        _contentController.clear();
+        _hasSavedData = false; // 상태를 초기화합니다.
+      });
     } else {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(content: Text('저장에 실패했습니다.')),
@@ -298,8 +304,6 @@ class _DiaryScreenState extends State<DiaryScreen> {
       floatingActionButton: !_hasSavedData
           ? FloatingActionButton.extended(
         onPressed: () {
-          _titleController.clear();
-          _contentController.clear();
           _saveDiary();
         },
         backgroundColor: Color(0xFFE5D0B5),
@@ -320,7 +324,7 @@ class _DiaryScreenState extends State<DiaryScreen> {
           });
         },
         backgroundColor: Color(0xFFE5D0B5),
-        child: Icon(Icons.add),
+        child: Icon(Icons.add, color: Colors.black),
       ),
     );
   }
