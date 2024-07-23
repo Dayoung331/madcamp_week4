@@ -112,7 +112,7 @@ class _CalendarScreenState extends State<CalendarScreen> {
       body: Column(
         children: [
           AspectRatio(
-            aspectRatio: 0.9, // 이 값을 조정하여 달력의 높이를 조정할 수 있습니다.
+            aspectRatio: 1.0, // 이 값을 조정하여 달력의 높이를 조정할 수 있습니다.
             child: TableCalendar(
               locale: 'ko_KR', // 달력 로케일을 한국어로 설정
               firstDay: DateTime(DateTime.now().year, 1, 1),
@@ -174,7 +174,7 @@ class _CalendarScreenState extends State<CalendarScreen> {
                   color: Colors.orangeAccent,
                   shape: BoxShape.circle,
                 ),
-                cellMargin: EdgeInsets.all(8.0), // 각 셀의 여백을 조정하여 셀 크기 증가
+                cellMargin: EdgeInsets.all(4.0), // 각 셀의 여백을 조정하여 셀 크기 증가
               ),
               calendarBuilders: CalendarBuilders(
                 dowBuilder: (context, day) {
@@ -270,12 +270,12 @@ class _CalendarScreenState extends State<CalendarScreen> {
                         mainAxisAlignment: MainAxisAlignment.center,
                         children: events.map((event) {
                           return Container(
-                            width: 7,
-                            height: 7,
+                            width: 15, // 이미지 너비 설정
+                            height: 15, // 이미지 높이 설정
                             margin: EdgeInsets.symmetric(horizontal: 1.5),
-                            decoration: BoxDecoration(
-                              shape: BoxShape.circle,
-                              color: event == 'Submitted' ? Colors.blue : Colors.green,
+                            child: Image.asset(
+                              event == 'Submitted' ? 'assets/images/calendar_diary.png' : 'assets/images/calendar_question_and_answer.png', // 이미지 파일 경로 설정
+                              fit: BoxFit.cover, // 이미지 비율에 맞게 조정
                             ),
                           );
                         }).toList(),
@@ -298,6 +298,7 @@ class _CalendarScreenState extends State<CalendarScreen> {
                 return ScheduleCard(
                   title: event,
                   color: event == 'Submitted' ? Colors.blue : Colors.green,
+                  date: _selectedDay ?? DateTime.now(), // 선택된 날짜를 전달
                   onTap: () {
                     // 다른 화면으로 이동할 때 Navigator 사용
                     Navigator.push(
@@ -320,23 +321,62 @@ class _CalendarScreenState extends State<CalendarScreen> {
 class ScheduleCard extends StatelessWidget {
   final String title;
   final Color color;
+  final DateTime date;
   final Function onTap;
 
-  ScheduleCard({required this.title, required this.color, required this.onTap});
+  ScheduleCard({required this.title, required this.color, required this.date, required this.onTap});
 
   @override
   Widget build(BuildContext context) {
+    // 날짜 형식을 "MM월 dd일"로 변환
+    String formattedDate = DateFormat('MM월 dd일').format(date);
+    String displayTitle;
+
+    if (title == 'Submitted') {
+      displayTitle = "$formattedDate의 답변 보기";
+    } else if (title == 'Diary Entry') {
+      displayTitle = "$formattedDate의 일기 보기";
+    } else {
+      displayTitle = title;
+    }
+
+    // 이미지 파일 경로 설정
+    String imagePath;
+    if (title == 'Submitted') {
+      imagePath = 'assets/images/calendar_question_and_answer.png';
+    } else if (title == 'Diary Entry') {
+      imagePath = 'assets/images/calendar_diary.png';
+    } else {
+      imagePath = 'assets/images/default.png'; // 기본 이미지 파일 경로 (선택 사항)
+    }
+
     return GestureDetector(
       onTap: () => onTap(),
       child: Card(
-        color: color,
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(15.0), // 모서리를 둥글게 설정
+          side: BorderSide(color: color, width: 2.0), // 테두리 색상과 두께 설정
+        ),
+        elevation: 5.0, // 그림자 설정
+        color: Colors.white, // 카드 배경색을 흰색으로 설정
         child: ListTile(
-          title: Text(title, style: TextStyle(color: Colors.white)),
+          leading: Image.asset(
+            imagePath,
+            width: 40.0, // 이미지 너비 설정
+            height: 40.0, // 이미지 높이 설정
+            fit: BoxFit.cover, // 이미지 비율에 맞게 조정
+          ), // title에 따라 다른 이미지를 표시
+          title: Text(
+            displayTitle,
+            style: TextStyle(color: Colors.black, fontFamily: 'AppleMyungjo', fontWeight: FontWeight.bold), // 텍스트 스타일 변경
+          ),
+          trailing: Icon(Icons.arrow_forward_ios, color: color), // 오른쪽에 아이콘 추가 및 색상 설정
         ),
       ),
     );
   }
 }
+
 
 class EventDetailScreen extends StatelessWidget {
   final String event;
