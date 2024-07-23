@@ -1,8 +1,9 @@
 import 'package:flutter/material.dart';
-import 'package:shared_preferences/shared_preferences.dart';
 import 'package:intl/intl.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
+import 'entry_form.dart';
+import 'entry_list.dart';
 
 void main() {
   runApp(MyApp());
@@ -150,104 +151,17 @@ class _DiaryScreenState extends State<DiaryScreen> {
       ),
       backgroundColor: Colors.white,
       builder: (BuildContext context) {
-        return Padding(
-          padding: EdgeInsets.only(
-            bottom: MediaQuery.of(context).viewInsets.bottom,
-            top: 20,
-            left: 20,
-            right: 20,
-          ),
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              Text(
-                '일기 수정',
-                style: TextStyle(
-                  fontSize: 24,
-                  fontWeight: FontWeight.bold,
-                  fontFamily: 'AppleMyungjo',
-                  color: Colors.brown,
-                ),
-              ),
-              SizedBox(height: 20),
-              Container(
-                decoration: BoxDecoration(
-                  color: Colors.brown[50],
-                  borderRadius: BorderRadius.circular(10),
-                ),
-                child: Padding(
-                  padding: const EdgeInsets.all(8.0),
-                  child: TextField(
-                    controller: _titleController,
-                    decoration: InputDecoration(
-                      hintText: '제목',
-                      hintStyle: TextStyle(
-                        color: Colors.brown,
-                        fontSize: 20,
-                        fontFamily: 'AppleMyungjo',
-                      ),
-                      border: InputBorder.none,
-                    ),
-                    style: TextStyle(
-                      fontSize: 20,
-                      fontWeight: FontWeight.bold,
-                      fontFamily: 'AppleMyungjo',
-                      color: Colors.brown,
-                    ),
-                  ),
-                ),
-              ),
-              SizedBox(height: 10),
-              Container(
-                decoration: BoxDecoration(
-                  color: Colors.brown[50],
-                  borderRadius: BorderRadius.circular(10),
-                ),
-                child: Padding(
-                  padding: const EdgeInsets.all(8.0),
-                  child: TextField(
-                    controller: _contentController,
-                    decoration: InputDecoration(
-                      hintText: '내용을 입력하세요.',
-                      hintStyle: TextStyle(
-                        color: Colors.brown,
-                        fontSize: 18,
-                        fontFamily: 'AppleMyungjo',
-                      ),
-                      border: InputBorder.none,
-                    ),
-                    style: TextStyle(
-                      fontSize: 18,
-                      fontFamily: 'AppleMyungjo',
-                      color: Colors.brown,
-                    ),
-                    maxLines: 5,
-                  ),
-                ),
-              ),
-              SizedBox(height: 20),
-              ElevatedButton(
-                onPressed: () {
-                  _updateEntry(index);
-                  Navigator.of(context).pop();
-                },
-                child: Text('저장 완료', style: TextStyle(fontFamily: 'AppleMyungjo', color: Colors.black)),
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: Color(0xFFE5D0B5),
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(20),
-                  ),
-                  padding: EdgeInsets.symmetric(horizontal: 30, vertical: 10),
-                ),
-              ),
-              SizedBox(height: 10),
-            ],
-          ),
+        return EntryForm(
+          titleController: _titleController,
+          contentController: _contentController,
+          onSave: () {
+            _updateEntry(index);
+            Navigator.of(context).pop();
+          },
         );
       },
     );
   }
-
 
   Future<void> _updateEntry(int index) async {
     String id = _entries[index]['_id'];
@@ -325,79 +239,11 @@ class _DiaryScreenState extends State<DiaryScreen> {
       body: Padding(
         padding: const EdgeInsets.all(16.0),
         child: _hasSavedData
-            ? ListView.builder(
-          itemCount: _entries.length,
-          itemBuilder: (context, index) {
-            return Card(
-              color: Colors.white,
-              elevation: 0,
-              margin: EdgeInsets.symmetric(vertical: 16.0, horizontal: 8.0),
-              child: Padding(
-                padding: const EdgeInsets.all(16.0),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                      children: [
-                        Text(
-                          _entries[index]['title'],
-                          style: TextStyle(
-                            fontSize: 20,
-                            fontWeight: FontWeight.bold,
-                            fontFamily: 'AppleMyungjo',
-                          ),
-                        ),
-                        Row(
-                          children: [
-                            TextButton(
-                              onPressed: () {
-                                _showEditModalBottomSheet(index);
-                              },
-                              child: Text(
-                                '수정',
-                                style: TextStyle(
-                                  fontFamily: 'AppleMyungjo',
-                                  color: Colors.grey.shade600,
-                                ),
-                              ),
-                            ),
-                            TextButton(
-                              onPressed: () => _showDeleteConfirmationDialog(index),
-                              child: Text(
-                                '삭제',
-                                style: TextStyle(
-                                  fontFamily: 'AppleMyungjo',
-                                  color: Colors.grey.shade600,
-                                ),
-                              ),
-                            ),
-                          ],
-                        ),
-                      ],
-                    ),
-                    SizedBox(height: 20.0),
-                    Text(
-                      '${DateFormat('yyyy년 M월 d일').format(_selectedDate)} ${_entries[index]['time']}',
-                      style: TextStyle(
-                        color: Colors.grey,
-                        fontSize: 14,
-                        fontFamily: 'AppleMyungjo',
-                      ),
-                    ),
-                    SizedBox(height: 20.0),
-                    Text(
-                      _entries[index]['content'],
-                      style: TextStyle(
-                        fontSize: 18,
-                        fontFamily: 'AppleMyungjo',
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-            );
-          },
+            ? EntryList(
+          entries: _entries,
+          onEdit: _showEditModalBottomSheet,
+          onDelete: _showDeleteConfirmationDialog,
+          selectedDate: _selectedDate,
         )
             : Column(
           crossAxisAlignment: CrossAxisAlignment.start,
@@ -451,7 +297,11 @@ class _DiaryScreenState extends State<DiaryScreen> {
       ),
       floatingActionButton: !_hasSavedData
           ? FloatingActionButton.extended(
-        onPressed: _saveDiary,
+        onPressed: () {
+          _titleController.clear();
+          _contentController.clear();
+          _saveDiary();
+        },
         backgroundColor: Color(0xFFE5D0B5),
         label: Text(
           '작성 완료',
@@ -465,6 +315,8 @@ class _DiaryScreenState extends State<DiaryScreen> {
         onPressed: () {
           setState(() {
             _hasSavedData = false;
+            _titleController.clear();
+            _contentController.clear();
           });
         },
         backgroundColor: Color(0xFFE5D0B5),
