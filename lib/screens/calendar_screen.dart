@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:table_calendar/table_calendar.dart';
 import 'package:intl/intl.dart';
+import 'package:http/http.dart' as http;
 
 class CalendarScreen extends StatefulWidget {
   final Function(DateTime) onDateSelected;
@@ -52,14 +53,13 @@ class _CalendarScreenState extends State<CalendarScreen> {
   }
 
   Future<void> _loadDiaryEntries() async {
-    SharedPreferences prefs = await SharedPreferences.getInstance();
-    Set<String> keys = prefs.getKeys();
+    final response = await http.get(Uri.parse('http://10.0.2.2:3000/diaries'));
 
-    keys.forEach((key) {
-      if (key.startsWith('diary_written_')) {
-        String dateString = key.replaceFirst('diary_written_', '');
+    if (response.statusCode == 200) {
+      List<dynamic> decodedEntries = json.decode(response.body);
+      decodedEntries.forEach((entry) {
         try {
-          DateTime date = DateFormat('yyyy.MM.dd').parse(dateString);
+          DateTime date = DateTime.parse(entry['date']);
           date = DateTime.utc(date.year, date.month, date.day);
           setState(() {
             if (_events[date] == null) {
@@ -70,9 +70,9 @@ class _CalendarScreenState extends State<CalendarScreen> {
         } catch (e) {
           print("Error parsing date: $e");
         }
-      }
-    });
-    print("Loaded Diary Entries: $_events");
+      });
+      print("Loaded Diary Entries: $_events");
+    }
   }
 
   void _populateEvents() {
