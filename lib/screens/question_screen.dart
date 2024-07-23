@@ -28,11 +28,25 @@ class _QuestionScreenState extends State<QuestionScreen> {
   }
 
   Future<void> _loadQuestions() async {
-    final String response = await rootBundle.loadString('assets/questions.json');
-    final data = await json.decode(response);
-    setState(() {
-      _questions = List<String>.from(data['questions']);
-    });
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    String? questionsString = prefs.getString('questions');
+    if (questionsString != null) {
+      setState(() {
+        _questions = List<String>.from(json.decode(questionsString));
+      });
+    } else {
+      final String response = await rootBundle.loadString('assets/questions.json');
+      final data = await json.decode(response);
+      setState(() {
+        _questions = List<String>.from(data['questions']);
+      });
+      await prefs.setString('questions', json.encode(_questions));
+    }
+  }
+
+  Future<void> _saveQuestions() async {
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    await prefs.setString('questions', json.encode(_questions));
   }
 
   Future<void> _loadAnswers() async {
@@ -157,6 +171,43 @@ class _QuestionScreenState extends State<QuestionScreen> {
     }
   }
 
+  void _showEditQuestionDialog(int dayOfYear) {
+    TextEditingController questionController = TextEditingController(text: _questions[dayOfYear - 1]);
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: Text('질문 수정'),
+          content: TextField(
+            controller: questionController,
+            decoration: InputDecoration(
+              hintText: '질문을 입력하세요',
+            ),
+          ),
+          actions: [
+            TextButton(
+              onPressed: () {
+                Navigator.of(context).pop();
+              },
+              child: Text('취소'),
+            ),
+            TextButton(
+              onPressed: () {
+                setState(() {
+                  _questions[dayOfYear - 1] = questionController.text;
+                });
+                _saveQuestions();
+                Navigator.of(context).pop();
+                _showSnackbar("질문이 수정되었습니다!");
+              },
+              child: Text('저장'),
+            ),
+          ],
+        );
+      },
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     if (_questions.isEmpty) {
@@ -198,6 +249,14 @@ class _QuestionScreenState extends State<QuestionScreen> {
           ],
         ),
         centerTitle: true,
+        actions: [
+          IconButton(
+            icon: Icon(Icons.edit),
+            onPressed: () {
+              _showEditQuestionDialog(dayOfYear);
+            },
+          ),
+        ],
       ),
       backgroundColor: Colors.white,
       body: SingleChildScrollView(
