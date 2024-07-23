@@ -87,6 +87,8 @@ flutter:
     - assets/images/calendar.png
     - assets/images/diary.png
     - assets/images/question.png
+    - assets/images/calendar_diary.png
+    - assets/images/calendar_question_and_answer.png
 
   # An image asset can refer to one or more resolution-specific "variants", see
   # https://flutter.dev/assets-and-images/#resolution-aware
