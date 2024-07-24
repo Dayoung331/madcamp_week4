@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:confetti/confetti.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:madcamp_week4/main.dart'; // MainScreen을 import
 
 class BirthdayScreen extends StatefulWidget {
   final VoidCallback onBirthdayMessageSubmitted;
@@ -40,10 +41,15 @@ class _BirthdayScreenState extends State<BirthdayScreen> {
   void _submitBirthdayMessage() {
     _saveBirthdayMessage(_textController.text);
     widget.onBirthdayMessageSubmitted(); // 생일 메시지 제출 후 콜백 호출
+    _navigateToQuestionScreen();
   }
 
   void _navigateToQuestionScreen() {
     widget.onBirthdayMessageSubmitted(); // 생일 메시지 작성하지 않고 넘어가는 경우도 콜백 호출
+    Navigator.pushReplacement(
+      context,
+      MaterialPageRoute(builder: (context) => MainScreen(showBirthdayScreen: false)),
+    );
   }
 
   @override
