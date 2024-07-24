@@ -1,12 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:intl/date_symbol_data_local.dart'; // 로케일 초기화
 import 'package:flutter_localizations/flutter_localizations.dart'; // Flutter 로컬라이제이션
-import 'package:madcamp_week4/screens/birthday_screen.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:intl/intl.dart';
 import 'screens/question_screen.dart';
 import 'screens/diary_screen.dart';
 import 'screens/calendar_screen.dart';
 import 'screens/birthday_input_screen.dart'; // 생일 입력 화면 추가
+import 'screens/birthday_screen.dart'; // 생일 화면 추가
 
 void main() {
   initializeDateFormatting('ko_KR', null).then((_) { // 로케일 초기화
@@ -41,6 +42,7 @@ class MainScreen extends StatefulWidget {
 class _MainScreenState extends State<MainScreen> {
   int _selectedIndex = 0;
   bool _isBirthdayEntered = false;
+  bool _isBirthdayToday = false;
 
   @override
   void initState() {
@@ -53,6 +55,19 @@ class _MainScreenState extends State<MainScreen> {
     setState(() {
       _isBirthdayEntered = prefs.getBool('birthdayEntered') ?? false;
     });
+
+    if (_isBirthdayEntered) {
+      String? birthdayString = prefs.getString('birthday');
+      if (birthdayString != null) {
+        DateTime birthday = DateTime.parse(birthdayString);
+        DateTime today = DateTime.now();
+        if (birthday.month == today.month && birthday.day == today.day) {
+          setState(() {
+            _isBirthdayToday = true;
+          });
+        }
+      }
+    }
   }
 
   void _onBirthdayEntered() async {
@@ -63,9 +78,14 @@ class _MainScreenState extends State<MainScreen> {
     });
   }
 
+  void _onBirthdayMessageSubmitted() {
+    setState(() {
+      _isBirthdayToday = false;
+    });
+  }
+
   static List<Widget> _widgetOptions = <Widget>[
-    //QuestionScreen(),
-    BirthdayScreen(),
+    QuestionScreen(),
     DiaryScreen(),
     CalendarScreen(onDateSelected: (date) {
       print('Selected date: $date');
@@ -83,10 +103,12 @@ class _MainScreenState extends State<MainScreen> {
     return Scaffold(
       body: Center(
         child: _isBirthdayEntered
-            ? _widgetOptions.elementAt(_selectedIndex)
+            ? (_isBirthdayToday
+            ? BirthdayScreen(onBirthdayMessageSubmitted: _onBirthdayMessageSubmitted)
+            : _widgetOptions.elementAt(_selectedIndex))
             : BirthdayInputScreen(onBirthdayEntered: _onBirthdayEntered),
       ),
-      bottomNavigationBar: _isBirthdayEntered
+      bottomNavigationBar: (_isBirthdayEntered && !_isBirthdayToday)
           ? BottomNavigationBar(
         items: <BottomNavigationBarItem>[
           BottomNavigationBarItem(

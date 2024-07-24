@@ -1,9 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:confetti/confetti.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-import 'question_screen.dart';
 
 class BirthdayScreen extends StatefulWidget {
+  final VoidCallback onBirthdayMessageSubmitted;
+
+  BirthdayScreen({required this.onBirthdayMessageSubmitted});
+
   @override
   _BirthdayScreenState createState() => _BirthdayScreenState();
 }
@@ -34,11 +37,9 @@ class _BirthdayScreenState extends State<BirthdayScreen> {
     print('Birthday message saved for year $year: $message');
   }
 
-  void _navigateToQuestionScreen() {
-    Navigator.push(
-      context,
-      MaterialPageRoute(builder: (context) => QuestionScreen()),
-    );
+  void _submitBirthdayMessage() {
+    _saveBirthdayMessage(_textController.text);
+    widget.onBirthdayMessageSubmitted(); // 생일 메시지 제출 후 콜백 호출
   }
 
   @override
@@ -111,17 +112,7 @@ class _BirthdayScreenState extends State<BirthdayScreen> {
                       ),
                       SizedBox(height: 20),
                       ElevatedButton(
-                        onPressed: () async {
-                          await _saveBirthdayMessage(_textController.text);
-                          ScaffoldMessenger.of(context).showSnackBar(
-                            SnackBar(content: Text('생일 메시지가 저장되었습니다!')),
-                          );
-                          setState(() {
-                            _isTextFieldVisible = false;
-                            _textController.clear();
-                          });
-                          _navigateToQuestionScreen(); // 답변 제출 후 QuestionScreen으로 이동
-                        },
+                        onPressed: _submitBirthdayMessage,
                         child: Text('제출'),
                         style: ElevatedButton.styleFrom(
                           foregroundColor: Colors.black,
