@@ -36,12 +36,16 @@ class PastAnswersScreen extends StatelessWidget {
     Navigator.of(context).pop(true);
   }
 
-  void _showBottomSheet(BuildContext context, String year) {
+  void _showBottomSheet(BuildContext context, String year, String answer) {
+    TextEditingController titleController = TextEditingController(text: year);
+    TextEditingController contentController = TextEditingController(text: answer);
+
     showModalBottomSheet(
       context: context,
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.vertical(top: Radius.circular(25.0)),
       ),
+      backgroundColor: Colors.white,
       builder: (BuildContext context) {
         return Padding(
           padding: const EdgeInsets.all(16.0),
@@ -53,7 +57,7 @@ class PastAnswersScreen extends StatelessWidget {
                 title: Text('글 수정하기'),
                 onTap: () {
                   Navigator.of(context).pop();
-                  // 글 수정 로직을 여기에 추가하세요.
+                  _showEditDialog(context, year, titleController, contentController);
                 },
               ),
               ListTile(
@@ -65,6 +69,42 @@ class PastAnswersScreen extends StatelessWidget {
                 },
               ),
             ],
+          ),
+        );
+      },
+    );
+  }
+
+  void _showEditDialog(BuildContext context, String year, TextEditingController titleController, TextEditingController contentController) {
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(12),
+          ),
+          backgroundColor: Colors.white,
+          content: EntryForm(
+            titleController: titleController,
+            contentController: contentController,
+            onSave: () async {
+              String newTitle = titleController.text;
+              String newContent = contentController.text;
+
+              // 글 수정 로직 추가
+              SharedPreferences prefs = await SharedPreferences.getInstance();
+              String? answersString = prefs.getString('answers');
+              if (answersString != null) {
+                Map<String, dynamic> decodedAnswers = json.decode(answersString);
+                if (decodedAnswers.containsKey(dateKey)) {
+                  Map<String, String> dateAnswers = Map<String, String>.from(decodedAnswers[dateKey]);
+                  dateAnswers[year] = newContent;
+                  decodedAnswers[dateKey] = dateAnswers;
+                  await prefs.setString('answers', json.encode(decodedAnswers));
+                }
+              }
+              Navigator.of(context).pop();
+            },
           ),
         );
       },
@@ -193,7 +233,7 @@ class PastAnswersScreen extends StatelessWidget {
             String answer = answers[year]!;
             return GestureDetector(
               onLongPress: () {
-                _showBottomSheet(context, year);
+                _showBottomSheet(context, year, answer);
               },
               child: Column(
                 children: [
@@ -237,6 +277,130 @@ class PastAnswersScreen extends StatelessWidget {
             );
           },
         ),
+      ),
+    );
+  }
+}
+
+class EntryForm extends StatelessWidget {
+  final TextEditingController titleController;
+  final TextEditingController contentController;
+  final VoidCallback onSave;
+
+  EntryForm({
+    required this.titleController,
+    required this.contentController,
+    required this.onSave,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Padding(
+      padding: EdgeInsets.only(
+        bottom: MediaQuery.of(context).viewInsets.bottom,
+        top: 20,
+        left: 20,
+        right: 20,
+      ),
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Text(
+            '일기 수정',
+            style: TextStyle(
+              fontSize: 22,
+              fontWeight: FontWeight.bold,
+              fontFamily: 'AppleMyungjo',
+              color: Colors.black87,
+            ),
+          ),
+          SizedBox(height: 20),
+          Container(
+            decoration: BoxDecoration(
+              color: Colors.white,
+              borderRadius: BorderRadius.circular(10),
+              border: Border.all(
+                color: Colors.black, // 검은색 테두리
+                width: 1.5,
+                style: BorderStyle.solid,
+              ),
+            ),
+            child: Padding(
+              padding: const EdgeInsets.all(8.0),
+              child: TextField(
+                controller: titleController,
+                decoration: InputDecoration(
+                  hintText: '제목',
+                  hintStyle: TextStyle(
+                    color: Colors.grey,
+                    fontSize: 18,
+                    fontFamily: 'AppleMyungjo',
+                  ),
+                  border: InputBorder.none,
+                ),
+                style: TextStyle(
+                  fontSize: 18,
+                  fontWeight: FontWeight.bold,
+                  fontFamily: 'AppleMyungjo',
+                  color: Colors.black87,
+                ),
+              ),
+            ),
+          ),
+          SizedBox(height: 10),
+          Container(
+            decoration: BoxDecoration(
+              color: Colors.white,
+              borderRadius: BorderRadius.circular(10),
+              border: Border.all(
+                color: Colors.black, // 검은색 테두리
+                width: 1.5,
+                style: BorderStyle.solid,
+              ),
+            ),
+            child: Padding(
+              padding: const EdgeInsets.all(8.0),
+              child: TextField(
+                controller: contentController,
+                decoration: InputDecoration(
+                  hintText: '내용을 입력하세요.',
+                  hintStyle: TextStyle(
+                    color: Colors.grey,
+                    fontSize: 16,
+                    fontFamily: 'AppleMyungjo',
+                  ),
+                  border: InputBorder.none,
+                ),
+                style: TextStyle(
+                  fontSize: 16,
+                  fontFamily: 'AppleMyungjo',
+                  color: Colors.black87,
+                ),
+                maxLines: 5,
+              ),
+            ),
+          ),
+          SizedBox(height: 20),
+          ElevatedButton(
+            onPressed: onSave,
+            child: Text(
+              '저장 완료',
+              style: TextStyle(
+                fontFamily: 'AppleMyungjo',
+                color: Colors.white,
+                fontSize: 16,
+              ),
+            ),
+            style: ElevatedButton.styleFrom(
+              backgroundColor: Color(0xFF4F483F),
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(10),
+              ),
+              padding: EdgeInsets.symmetric(horizontal: 30, vertical: 15),
+            ),
+          ),
+          SizedBox(height: 10),
+        ],
       ),
     );
   }

@@ -93,6 +93,8 @@ flutter:
     - assets/images/calendar_diary.png
     - assets/images/calendar_question_and_answer.png
     - assets/Animation_send.json
+    - assets/images/paper_texture.jpg
+    - assets/images/grid_background.jpg
 
   # An image asset can refer to one or more resolution-specific "variants", see
   # https://flutter.dev/assets-and-images/#resolution-aware
