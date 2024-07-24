@@ -3,6 +3,7 @@ import 'package:lottie/lottie.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'dart:convert';
 import 'past_answers_screen.dart';
+import 'birthday_answers_screen.dart';
 import 'package:intl/intl.dart';
 import 'package:flutter/services.dart';
 
@@ -18,6 +19,7 @@ class _QuestionScreenState extends State<QuestionScreen> {
   Map<String, bool> _isAnswerSubmittedMap = {}; // 날짜별 답변 제출 상태를 저장하는 맵
   TextEditingController _answerController = TextEditingController();
   bool _showAnimation = false;
+  bool _isBirthday = false; // 생일인지 여부를 저장
 
   bool get _isAnswerSubmitted => _isAnswerSubmittedMap[DateFormat('MMdd').format(_currentDate)] ?? false;
   set _isAnswerSubmitted(bool value) => _isAnswerSubmittedMap[DateFormat('MMdd').format(_currentDate)] = value;
@@ -27,6 +29,7 @@ class _QuestionScreenState extends State<QuestionScreen> {
     super.initState();
     _loadQuestions();
     _loadAnswers(); // 저장된 답변을 불러옵니다.
+    _checkBirthday(); // 생일인지 여부를 체크
   }
 
   Future<void> _loadQuestions() async {
@@ -101,6 +104,7 @@ class _QuestionScreenState extends State<QuestionScreen> {
     setState(() {
       _currentDate = _currentDate.add(Duration(days: days));
     });
+    _checkBirthday(); // 날짜가 변경될 때마다 생일인지 여부를 체크
   }
 
   void _submitAnswer() {
@@ -119,8 +123,8 @@ class _QuestionScreenState extends State<QuestionScreen> {
         });
         print("Answer submitted: $answer for date: $dateKey");
         _showSnackbar("답변이 제출되었습니다!");
-        _showRevealAnimation();
       }
+      _showRevealAnimation();
     }
   }
 
@@ -174,19 +178,19 @@ class _QuestionScreenState extends State<QuestionScreen> {
 
   void _showSnackbar(String message) {
     final snackBar = SnackBar(
-        content: Row(
-          children: [
-            Icon(Icons.check_circle, color: Color(0xFFE5D0B5)),
-            SizedBox(width: 8.0),
-            Text(message),
-          ],
-        ),
-        backgroundColor: Colors.grey[600],
-        behavior: SnackBarBehavior.floating,
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(10),
-        ),
-        duration: Duration(seconds: 2),
+      content: Row(
+        children: [
+          Icon(Icons.check_circle, color: Color(0xFFE5D0B5)),
+          SizedBox(width: 8.0),
+          Text(message),
+        ],
+      ),
+      backgroundColor: Colors.grey[600],
+      behavior: SnackBarBehavior.floating,
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(10),
+      ),
+      duration: Duration(seconds: 2),
     );
     ScaffoldMessenger.of(context).showSnackBar(snackBar);
   }
@@ -236,6 +240,37 @@ class _QuestionScreenState extends State<QuestionScreen> {
           ],
         );
       },
+    );
+  }
+
+  Future<void> _checkBirthday() async {
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    String? birthdayString = prefs.getString('birthday');
+    if (birthdayString != null) {
+      DateTime birthday = DateFormat('yyyy-MM-dd').parse(birthdayString);
+      setState(() {
+        _isBirthday = (birthday.month == _currentDate.month && birthday.day == _currentDate.day);
+        print('Birthday check: $_isBirthday');
+      });
+    }
+  }
+
+  void _showBirthdayAnswers() async {
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    Map<String, String> birthdayAnswers = {};
+    prefs.getKeys().forEach((key) {
+      if (key.startsWith('birthday_message_')) {
+        birthdayAnswers[key.replaceFirst('birthday_message_', '')] = prefs.getString(key)!;
+      }
+    });
+    print('Birthday answers: $birthdayAnswers');
+    Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (context) => BirthdayAnswersScreen(
+          birthdayAnswers: birthdayAnswers,
+        ),
+      ),
     );
   }
 
@@ -298,14 +333,14 @@ class _QuestionScreenState extends State<QuestionScreen> {
                 mainAxisAlignment: MainAxisAlignment.start, // 상단 정렬
                 children: [
                   Align(
-                    alignment: Alignment.centerLeft,
-                    child: Padding(
-                      padding: EdgeInsets.only(left: 16.0),
-                      child: Transform.rotate(
-                        angle: 180 * 3.1415927 / 180,
-                        child: Icon(Icons.format_quote, size: 30, color: Colors.black),
-                      ),
-                    )
+                      alignment: Alignment.centerLeft,
+                      child: Padding(
+                        padding: EdgeInsets.only(left: 16.0),
+                        child: Transform.rotate(
+                          angle: 180 * 3.1415927 / 180,
+                          child: Icon(Icons.format_quote, size: 30, color: Colors.black),
+                        ),
+                      )
                   ),
                   Container(
                     width: 250,
@@ -331,14 +366,14 @@ class _QuestionScreenState extends State<QuestionScreen> {
                     icon: Icon(Icons.edit, size: 20),
                     onPressed: () {
                       _showEditQuestionDialog(dayOfYear);
-                      },
+                    },
                   ),
                   Align(
-                    alignment: Alignment.centerRight,
-                    child: Padding(
-                      padding: EdgeInsets.only(right: 16.0),
-                      child: Icon(Icons.format_quote, size: 30, color: Colors.black),
-                    )
+                      alignment: Alignment.centerRight,
+                      child: Padding(
+                        padding: EdgeInsets.only(right: 16.0),
+                        child: Icon(Icons.format_quote, size: 30, color: Colors.black),
+                      )
                   ),
                   SizedBox(height: 20),
                   Container(
@@ -383,35 +418,45 @@ class _QuestionScreenState extends State<QuestionScreen> {
                     ),
                   ),
                   SizedBox(height: 20),
-                  ElevatedButton(
-                    onPressed: () async {
-                      String dateKey = DateFormat('MMdd').format(_currentDate);
-                      bool shouldUpdate = await Navigator.push(
-                        context,
-                        MaterialPageRoute(
-                          builder: (context) => PastAnswersScreen(
-                            dateKey: dateKey,
-                            answers: _answers[dateKey] ?? {},
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      ElevatedButton(
+                        onPressed: () async {
+                          String dateKey = DateFormat('MMdd').format(_currentDate);
+                          bool shouldUpdate = await Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                              builder: (context) => PastAnswersScreen(
+                                dateKey: dateKey,
+                                answers: _answers[dateKey] ?? {},
+                              ),
+                            ),
+                          );
+                          if (shouldUpdate == true) {
+                            await _loadAnswers(); // 삭제 후 상태를 다시 로드
+                            await _updateSubmittedStatus(dateKey);
+                          }
+                        },
+                        style: ElevatedButton.styleFrom(
+                          foregroundColor: Colors.white,
+                          backgroundColor: Colors.grey,
+                          padding: EdgeInsets.symmetric(horizontal: 100, vertical: 15),
+                          minimumSize: Size(250, 50), // 버튼의 최소 크기 설정
+                        ),
+                        child: Text(
+                          '과거의 나 돌아보기',
+                          style: TextStyle(
+                            fontFamily: 'NotoSerifKR',
                           ),
                         ),
-                      );
-                      if (shouldUpdate == true) {
-                        await _loadAnswers(); // 삭제 후 상태를 다시 로드
-                        await _updateSubmittedStatus(dateKey);
-                      }
-                    },
-                    style: ElevatedButton.styleFrom(
-                      foregroundColor: Colors.white,
-                      backgroundColor: Colors.grey,
-                      padding: EdgeInsets.symmetric(horizontal: 100, vertical: 15),
-                      minimumSize: Size(250, 50), // 버튼의 최소 크기 설정
-                    ),
-                    child: Text(
-                      '과거의 나 돌아보기',
-                      style: TextStyle(
-                        fontFamily: 'NotoSerifKR',
                       ),
-                    ),
+                      if (_isBirthday) // 생일인 경우 케이크 아이콘 표시
+                        IconButton(
+                          icon: Icon(Icons.cake, color: Colors.pink),
+                          onPressed: _showBirthdayAnswers,
+                        ),
+                    ],
                   ),
                 ],
               ),

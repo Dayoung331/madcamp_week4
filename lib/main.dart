@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:intl/date_symbol_data_local.dart'; // 로케일 초기화
 import 'package:flutter_localizations/flutter_localizations.dart'; // Flutter 로컬라이제이션
+import 'package:madcamp_week4/screens/birthday_screen.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'screens/question_screen.dart';
 import 'screens/diary_screen.dart';
@@ -63,7 +64,8 @@ class _MainScreenState extends State<MainScreen> {
   }
 
   static List<Widget> _widgetOptions = <Widget>[
-    QuestionScreen(),
+    //QuestionScreen(),
+    BirthdayScreen(),
     DiaryScreen(),
     CalendarScreen(onDateSelected: (date) {
       print('Selected date: $date');
