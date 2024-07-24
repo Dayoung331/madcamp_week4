@@ -33,9 +33,9 @@ class _BirthdayInputScreenState extends State<BirthdayInputScreen> {
   void _checkIfTodayIsBirthday() {
     DateTime today = DateTime.now();
     if (_selectedDate.month == today.month && _selectedDate.day == today.day) {
-      Navigator.of(context).pushAndRemoveUntil(
+      Navigator.pushReplacement(
+        context,
         MaterialPageRoute(builder: (context) => BirthdayScreen(onBirthdayMessageSubmitted: widget.onBirthdayEntered)),
-            (Route<dynamic> route) => false,
       );
     } else {
       Navigator.pop(context);
