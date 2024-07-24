@@ -143,99 +143,99 @@ class _QuestionScreenState extends State<QuestionScreen> {
   }
 
   void _showConfirmationDialog(String dateKey, String newAnswer) {
-      showDialog(
-        context: context,
-        builder: (BuildContext context) {
-          return AlertDialog(
-            shape: RoundedRectangleBorder(
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(12),
+          ),
+          backgroundColor: Colors.white, // 배경색을 흰색으로 설정
+          titlePadding: EdgeInsets.all(0),
+          contentPadding: EdgeInsets.all(0),
+          actionsPadding: EdgeInsets.symmetric(horizontal: 10, vertical: 5),
+          content: Container(
+            padding: EdgeInsets.symmetric(horizontal: 20, vertical: 20),
+            decoration: BoxDecoration(
+              color: Colors.white, // 배경색을 흰색으로 설정
               borderRadius: BorderRadius.circular(12),
             ),
-            backgroundColor: Colors.white, // 배경색을 흰색으로 설정
-            titlePadding: EdgeInsets.all(0),
-            contentPadding: EdgeInsets.all(0),
-            actionsPadding: EdgeInsets.symmetric(horizontal: 10, vertical: 5),
-            content: Container(
-              padding: EdgeInsets.symmetric(horizontal: 20, vertical: 20),
-              decoration: BoxDecoration(
-                color: Colors.white, // 배경색을 흰색으로 설정
-                borderRadius: BorderRadius.circular(12),
-              ),
-              child: Column(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  Icon(
-                    Icons.error_outline,
-                    color: Colors.black,
-                    size: 40,
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Icon(
+                  Icons.error_outline,
+                  color: Colors.black,
+                  size: 40,
+                ),
+                SizedBox(height: 20),
+                Text(
+                  '기존 답변이 덮어씌워집니다. 계속하시겠습니까?',
+                  style: TextStyle(
+                    fontSize: 16,
+                    fontFamily: 'NotoSerifKR',
                   ),
-                  SizedBox(height: 20),
-                  Text(
-                    '기존 답변이 덮어씌워집니다. 계속하시겠습니까?',
-                    style: TextStyle(
-                      fontSize: 16,
-                      fontFamily: 'NotoSerifKR',
+                ),
+              ],
+            ),
+          ),
+          actions: [
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 10.0, vertical: 10.0),
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  Expanded(
+                    child: TextButton(
+                      style: TextButton.styleFrom(
+                        backgroundColor: Colors.grey[200],
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(8),
+                        ),
+                        padding: EdgeInsets.symmetric(vertical: 12),
+                      ),
+                      child: Text(
+                        '취소',
+                        style: TextStyle(
+                          fontFamily: 'NotoSerifKR',
+                          color: Colors.black,
+                        ),
+                      ),
+                      onPressed: () {
+                        Navigator.of(context).pop();
+                      },
+                    ),
+                  ),
+                  SizedBox(width: 10), // 버튼 간격 조정
+                  Expanded(
+                    child: TextButton(
+                      style: TextButton.styleFrom(
+                        backgroundColor: Colors.black,
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(8),
+                        ),
+                        padding: EdgeInsets.symmetric(vertical: 12),
+                      ),
+                      child: Text(
+                        '예',
+                        style: TextStyle(
+                          fontFamily: 'NotoSerifKR',
+                          color: Colors.white,
+                        ),
+                      ),
+                      onPressed: () {
+                        Navigator.of(context).pop();
+                        _saveAnswer(dateKey, newAnswer);
+                      },
                     ),
                   ),
                 ],
               ),
             ),
-            actions: [
-              Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 10.0, vertical: 10.0),
-                child: Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    Expanded(
-                      child: TextButton(
-                        style: TextButton.styleFrom(
-                          backgroundColor: Colors.grey[200],
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(8),
-                          ),
-                          padding: EdgeInsets.symmetric(vertical: 12),
-                        ),
-                        child: Text(
-                          '취소',
-                          style: TextStyle(
-                            fontFamily: 'NotoSerifKR',
-                            color: Colors.black,
-                          ),
-                        ),
-                        onPressed: () {
-                          Navigator.of(context).pop();
-                        },
-                      ),
-                    ),
-                    SizedBox(width: 10), // 버튼 간격 조정
-                    Expanded(
-                      child: TextButton(
-                        style: TextButton.styleFrom(
-                          backgroundColor: Colors.black,
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(8),
-                          ),
-                          padding: EdgeInsets.symmetric(vertical: 12),
-                        ),
-                        child: Text(
-                          '예',
-                          style: TextStyle(
-                            fontFamily: 'NotoSerifKR',
-                            color: Colors.white,
-                          ),
-                        ),
-                        onPressed: () {
-                          Navigator.of(context).pop();
-                          _saveAnswer(dateKey, newAnswer);
-                        },
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-            ],
-          );
-        },
-      );
+          ],
+        );
+      },
+    );
   }
 
   void _showSnackbar(String message) {
@@ -345,9 +345,18 @@ class _QuestionScreenState extends State<QuestionScreen> {
                 _changeDate(-1);
               },
             ),
-            Text(
-              DateFormat('yyyy. MM. dd').format(_currentDate),
-              style: TextStyle(color: Colors.black, fontSize: 20),
+            Row(
+              children: [
+                Text(
+                  DateFormat('yyyy. MM. dd').format(_currentDate),
+                  style: TextStyle(color: Colors.black, fontSize: 20),
+                ),
+                if (_isBirthday)
+                  IconButton(
+                    icon: Icon(Icons.cake, color: Color(0xFF8B4513)),
+                    onPressed: _showBirthdayAnswers,
+                  ),
+              ],
             ),
             IconButton(
               padding: const EdgeInsets.only(right: 15.0),
@@ -463,45 +472,35 @@ class _QuestionScreenState extends State<QuestionScreen> {
                     ),
                   ),
                   SizedBox(height: 20),
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      ElevatedButton(
-                        onPressed: () async {
-                          String dateKey = DateFormat('MMdd').format(_currentDate);
-                          bool shouldUpdate = await Navigator.push(
-                            context,
-                            MaterialPageRoute(
-                              builder: (context) => PastAnswersScreen(
-                                dateKey: dateKey,
-                                answers: _answers[dateKey] ?? {},
-                              ),
-                            ),
-                          );
-                          if (shouldUpdate == true) {
-                            await _loadAnswers(); // 삭제 후 상태를 다시 로드
-                            await _updateSubmittedStatus(dateKey);
-                          }
-                        },
-                        style: ElevatedButton.styleFrom(
-                          foregroundColor: Colors.white,
-                          backgroundColor: Colors.grey,
-                          padding: EdgeInsets.symmetric(horizontal: 100, vertical: 15),
-                          minimumSize: Size(250, 50), // 버튼의 최소 크기 설정
-                        ),
-                        child: Text(
-                          '과거의 나 돌아보기',
-                          style: TextStyle(
-                            fontFamily: 'NotoSerifKR',
+                  ElevatedButton(
+                    onPressed: () async {
+                      String dateKey = DateFormat('MMdd').format(_currentDate);
+                      bool shouldUpdate = await Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (context) => PastAnswersScreen(
+                            dateKey: dateKey,
+                            answers: _answers[dateKey] ?? {},
                           ),
                         ),
+                      );
+                      if (shouldUpdate == true) {
+                        await _loadAnswers(); // 삭제 후 상태를 다시 로드
+                        await _updateSubmittedStatus(dateKey);
+                      }
+                    },
+                    style: ElevatedButton.styleFrom(
+                      foregroundColor: Colors.white,
+                      backgroundColor: Color(0xFF979797),
+                      padding: EdgeInsets.symmetric(horizontal: 100, vertical: 15),
+                      minimumSize: Size(250, 50), // 버튼의 최소 크기 설정
+                    ),
+                    child: Text(
+                      '과거의 나 돌아보기',
+                      style: TextStyle(
+                        fontFamily: 'NotoSerifKR',
                       ),
-                      if (_isBirthday) // 생일인 경우 케이크 아이콘 표시
-                        IconButton(
-                          icon: Icon(Icons.cake, color: Colors.pink),
-                          onPressed: _showBirthdayAnswers,
-                        ),
-                    ],
+                    ),
                   ),
                 ],
               ),
@@ -544,21 +543,21 @@ class EditQuestionScreen extends StatelessWidget {
         elevation: 0,
         centerTitle: true,
         leading: // 왼쪽 패딩 추가
+        TextButton(
+          onPressed: () {
+            FocusScope.of(context).unfocus();
+            Navigator.of(context).pop();
+          },
+          child: Text('취소', style: TextStyle(color: Colors.black, fontFamily: 'AppleMyungjo')),
+        ),
+        actions: [
           TextButton(
             onPressed: () {
               FocusScope.of(context).unfocus();
-              Navigator.of(context).pop();
+              Navigator.of(context).pop(_controller.text);
             },
-            child: Text('취소', style: TextStyle(color: Colors.black, fontFamily: 'AppleMyungjo')),
-        ),
-        actions: [
-            TextButton(
-              onPressed: () {
-                FocusScope.of(context).unfocus();
-                Navigator.of(context).pop(_controller.text);
-              },
-              child: Text('완료', style: TextStyle(color: Colors.black, fontFamily: 'AppleMyungjo')),
-            ),
+            child: Text('완료', style: TextStyle(color: Colors.black, fontFamily: 'AppleMyungjo')),
+          ),
         ],
       ),
       backgroundColor: Colors.white,
