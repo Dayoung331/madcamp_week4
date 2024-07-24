@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:intl/intl.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'birthday_screen.dart';
 
 class BirthdayInputScreen extends StatefulWidget {
   final VoidCallback onBirthdayEntered;
@@ -26,6 +27,19 @@ class _BirthdayInputScreenState extends State<BirthdayInputScreen> {
     SharedPreferences prefs = await SharedPreferences.getInstance();
     await prefs.setString('birthday', DateFormat('yyyy-MM-dd').format(_selectedDate));
     widget.onBirthdayEntered();
+    _checkIfTodayIsBirthday();
+  }
+
+  void _checkIfTodayIsBirthday() {
+    DateTime today = DateTime.now();
+    if (_selectedDate.month == today.month && _selectedDate.day == today.day) {
+      Navigator.of(context).pushAndRemoveUntil(
+        MaterialPageRoute(builder: (context) => BirthdayScreen(onBirthdayMessageSubmitted: widget.onBirthdayEntered)),
+            (Route<dynamic> route) => false,
+      );
+    } else {
+      Navigator.pop(context);
+    }
   }
 
   void _showDatePicker() {
@@ -75,7 +89,7 @@ class _BirthdayInputScreenState extends State<BirthdayInputScreen> {
         leading: IconButton(
           icon: Icon(Icons.arrow_back_ios, color: Colors.black),
           onPressed: () {
-            // 뒤로 가기 동작
+            Navigator.pop(context); // 뒤로 가기 동작
           },
         ),
       ),
