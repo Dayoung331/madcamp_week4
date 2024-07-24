@@ -105,12 +105,12 @@ class EntryForm extends StatelessWidget {
               '저장 완료',
               style: TextStyle(
                 fontFamily: 'AppleMyungjo',
-                color: Colors.white,
+                color: Colors.black,
                 fontSize: 16,
               ),
             ),
             style: ElevatedButton.styleFrom(
-              backgroundColor: Color(0xFF4F483F),
+              backgroundColor: Color(0xFFE5D0B5),
               shape: RoundedRectangleBorder(
                 borderRadius: BorderRadius.circular(10),
               ),

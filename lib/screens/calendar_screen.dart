@@ -19,6 +19,7 @@ class _CalendarScreenState extends State<CalendarScreen> {
   Map<DateTime, List<String>> _events = {};
   Map<String, bool> _isAnswerSubmittedMap = {};
   Map<String, Map<String, String>> _answers = {}; // 날짜별 답변을 저장하는 맵
+  Map<String, String> _questions = {}; // 날짜별 질문을 저장하는 맵
   DateTime _focusedDay = DateTime.now();
   DateTime? _selectedDay;
   List<String> _selectedEvents = [];
@@ -28,6 +29,7 @@ class _CalendarScreenState extends State<CalendarScreen> {
     super.initState();
     _loadSubmittedStatus();
     _loadAnswers(); // 저장된 답변을 불러옵니다.
+    _loadQuestions(); // 질문을 로드합니다.
     _printStoredData();
     _loadDiaryEntries();
     Intl.defaultLocale = 'ko_KR'; // 기본 로케일을 한국어로 설정
@@ -69,6 +71,17 @@ class _CalendarScreenState extends State<CalendarScreen> {
       });
     }
     print("Answers loaded: $_answers");
+  }
+
+  Future<void> _loadQuestions() async {
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    String? questionsString = prefs.getString('questions');
+    if (questionsString != null) {
+      Map<String, dynamic> decodedQuestions = json.decode(questionsString);
+      setState(() {
+        _questions = Map<String, String>.from(decodedQuestions);
+      });
+    }
   }
 
   Future<void> _loadDiaryEntries() async {
@@ -343,6 +356,8 @@ class _CalendarScreenState extends State<CalendarScreen> {
                     } else {
                       // dateKey를 생성
                       String dateKey = DateFormat('MMdd').format(_selectedDay ?? DateTime.now());
+                      // 질문 가져오기
+                      String question = _questions[dateKey] ?? "질문 없음";
                       // PastAnswersScreen으로 이동
                       Navigator.push(
                         context,
@@ -350,6 +365,7 @@ class _CalendarScreenState extends State<CalendarScreen> {
                           builder: (context) => PastAnswersScreen(
                             dateKey: dateKey,
                             answers: _answers[dateKey] ?? {},
+                            question: question,
                           ),
                         ),
                       );

@@ -336,14 +336,14 @@ class _DiaryScreenState extends State<DiaryScreen> {
                   hintStyle: TextStyle(
                     color: Colors.grey,
                     fontSize: 20,
-                    fontFamily: 'AppleMyungjo',
+                    fontFamily: 'NotoSerifKR',
                   ),
                   border: InputBorder.none,
                 ),
                 style: TextStyle(
                   fontSize: 20,
                   fontWeight: FontWeight.bold,
-                  fontFamily: 'AppleMyungjo',
+                  fontFamily: 'NotoSerifKR',
                 ),
               ),
             ),
@@ -359,13 +359,13 @@ class _DiaryScreenState extends State<DiaryScreen> {
                     hintStyle: TextStyle(
                       color: Colors.grey,
                       fontSize: 18,
-                      fontFamily: 'AppleMyungjo',
+                      fontFamily: 'NotoSerifKR',
                     ),
                     border: InputBorder.none,
                   ),
                   style: TextStyle(
                     fontSize: 18,
-                    fontFamily: 'AppleMyungjo',
+                    fontFamily: 'NotoSerifKR',
                   ),
                   maxLines: null,
                   keyboardType: TextInputType.multiline,
@@ -384,7 +384,7 @@ class _DiaryScreenState extends State<DiaryScreen> {
         label: Text(
           '작성 완료',
           style: TextStyle(
-            fontFamily: 'AppleMyungjo',
+            fontFamily: 'NotoSerifKR',
             color: Colors.black,
           ),
         ),

@@ -448,6 +448,7 @@ class _QuestionScreenState extends State<QuestionScreen> {
                     child: TextField(
                       controller: _answerController,
                       maxLines: 9,
+                      style: TextStyle(fontFamily: 'NotoSerifKR'),
                       decoration: InputDecoration(
                         border: InputBorder.none,
                         hintText: '답변',
@@ -490,6 +491,7 @@ class _QuestionScreenState extends State<QuestionScreen> {
                           builder: (context) => PastAnswersScreen(
                             dateKey: dateKey,
                             answers: _answers[dateKey] ?? {},
+                            question: _questions[(dayOfYear - 1) % 366], // 해당 날짜의 질문 전달
                           ),
                         ),
                       );
