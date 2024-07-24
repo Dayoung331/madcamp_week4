@@ -532,6 +532,12 @@ class EditQuestionScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    FocusNode _focusNode = FocusNode();
+
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      FocusScope.of(context).requestFocus(_focusNode);
+    });
+
     return Scaffold(
       appBar: AppBar(
         backgroundColor: Colors.white,
@@ -540,6 +546,7 @@ class EditQuestionScreen extends StatelessWidget {
         leading: // 왼쪽 패딩 추가
           TextButton(
             onPressed: () {
+              FocusScope.of(context).unfocus();
               Navigator.of(context).pop();
             },
             child: Text('취소', style: TextStyle(color: Colors.black, fontFamily: 'AppleMyungjo')),
@@ -547,6 +554,7 @@ class EditQuestionScreen extends StatelessWidget {
         actions: [
             TextButton(
               onPressed: () {
+                FocusScope.of(context).unfocus();
                 Navigator.of(context).pop(_controller.text);
               },
               child: Text('완료', style: TextStyle(color: Colors.black, fontFamily: 'AppleMyungjo')),
@@ -567,8 +575,7 @@ class EditQuestionScreen extends StatelessWidget {
                   Text(
                     '원하는 질문으로 바꿔보세요',
                     style: TextStyle(
-                      fontSize: 20,
-                      color: Colors.grey,
+                      fontSize: 18,
                       fontFamily: 'AppleMyungjo',
                     ),
                   ),
@@ -576,7 +583,8 @@ class EditQuestionScreen extends StatelessWidget {
                   TextField(
                     controller: _controller,
                     textAlign: TextAlign.center,
-                    style: TextStyle(fontSize: 24, color: Colors.black, fontFamily: 'AppleMyungjo'),
+                    focusNode: _focusNode,
+                    style: TextStyle(fontSize: 20, color: Colors.black, fontFamily: 'AppleMyungjo'),
                     maxLines: null, // 여러 줄에 걸쳐서 텍스트를 표시할 수 있도록 설정
                     decoration: InputDecoration(
                       border: InputBorder.none,
