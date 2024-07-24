@@ -42,6 +42,10 @@ class _BirthdayScreenState extends State<BirthdayScreen> {
     widget.onBirthdayMessageSubmitted(); // 생일 메시지 제출 후 콜백 호출
   }
 
+  void _navigateToQuestionScreen() {
+    widget.onBirthdayMessageSubmitted(); // 생일 메시지 작성하지 않고 넘어가는 경우도 콜백 호출
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -58,6 +62,7 @@ class _BirthdayScreenState extends State<BirthdayScreen> {
                     fontSize: 40,
                     fontWeight: FontWeight.bold,
                     color: Colors.black,
+                    fontFamily: 'AppleMyungjo',
                   ),
                 ),
                 SizedBox(height: 20),
@@ -67,6 +72,7 @@ class _BirthdayScreenState extends State<BirthdayScreen> {
                   style: TextStyle(
                     fontSize: 20,
                     color: Colors.grey,
+                    fontFamily: 'AppleMyungjo',
                   ),
                 ),
                 Text(
@@ -75,6 +81,7 @@ class _BirthdayScreenState extends State<BirthdayScreen> {
                   style: TextStyle(
                     fontSize: 20,
                     color: Colors.grey,
+                    fontFamily: 'AppleMyungjo',
                   ),
                 ),
                 SizedBox(height: 50),
@@ -92,6 +99,25 @@ class _BirthdayScreenState extends State<BirthdayScreen> {
                     textStyle: TextStyle(
                       fontSize: 18,
                       fontWeight: FontWeight.bold,
+                      fontFamily: 'AppleMyungjo',
+                    ),
+                    padding: EdgeInsets.symmetric(horizontal: 30, vertical: 15),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(30),
+                    ),
+                  ),
+                ),
+                SizedBox(height: 10),
+                ElevatedButton(
+                  onPressed: _navigateToQuestionScreen,
+                  child: Text('나중에 작성하기'),
+                  style: ElevatedButton.styleFrom(
+                    foregroundColor: Colors.black,
+                    backgroundColor: Color(0xFFE5D0B5),
+                    textStyle: TextStyle(
+                      fontSize: 18,
+                      fontWeight: FontWeight.bold,
+                      fontFamily: 'AppleMyungjo',
                     ),
                     padding: EdgeInsets.symmetric(horizontal: 30, vertical: 15),
                     shape: RoundedRectangleBorder(
@@ -108,7 +134,9 @@ class _BirthdayScreenState extends State<BirthdayScreen> {
                         decoration: InputDecoration(
                           labelText: '생일 메시지 작성',
                           border: OutlineInputBorder(),
+                          labelStyle: TextStyle(fontFamily: 'AppleMyungjo'),
                         ),
+                        style: TextStyle(fontFamily: 'AppleMyungjo'),
                       ),
                       SizedBox(height: 20),
                       ElevatedButton(
@@ -120,6 +148,7 @@ class _BirthdayScreenState extends State<BirthdayScreen> {
                           textStyle: TextStyle(
                             fontSize: 18,
                             fontWeight: FontWeight.bold,
+                            fontFamily: 'AppleMyungjo',
                           ),
                           padding: EdgeInsets.symmetric(horizontal: 30, vertical: 15),
                           shape: RoundedRectangleBorder(
