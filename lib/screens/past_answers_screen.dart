@@ -36,6 +36,41 @@ class PastAnswersScreen extends StatelessWidget {
     Navigator.of(context).pop(true);
   }
 
+  void _showBottomSheet(BuildContext context, String year) {
+    showModalBottomSheet(
+      context: context,
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(25.0)),
+      ),
+      builder: (BuildContext context) {
+        return Padding(
+          padding: const EdgeInsets.all(16.0),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              ListTile(
+                leading: Icon(Icons.edit),
+                title: Text('글 수정하기'),
+                onTap: () {
+                  Navigator.of(context).pop();
+                  // 글 수정 로직을 여기에 추가하세요.
+                },
+              ),
+              ListTile(
+                leading: Icon(Icons.delete),
+                title: Text('글 삭제하기'),
+                onTap: () {
+                  Navigator.of(context).pop();
+                  _showDeleteConfirmationDialog(context, year);
+                },
+              ),
+            ],
+          ),
+        );
+      },
+    );
+  }
+
   void _showDeleteConfirmationDialog(BuildContext context, String year) {
     showDialog(
       context: context,
@@ -150,46 +185,51 @@ class PastAnswersScreen extends StatelessWidget {
       ),
       backgroundColor: Colors.white,
       body: Padding(
-        padding: const EdgeInsets.all(16.0),
+        padding: const EdgeInsets.only(left: 25.0, right: 25.0, bottom: 16.0),
         child: ListView.builder(
           itemCount: answers.length,
           itemBuilder: (context, index) {
             String year = answers.keys.elementAt(index);
             String answer = answers[year]!;
-            return Container(
-              margin: EdgeInsets.symmetric(vertical: 10.0),
-              padding: EdgeInsets.all(16.0),
-              decoration: BoxDecoration(
-                border: Border.all(color: Colors.grey),
-                borderRadius: BorderRadius.circular(12),
-              ),
+            return GestureDetector(
+              onLongPress: () {
+                _showBottomSheet(context, year);
+              },
               child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Text(
-                    '$year년의 나',
-                    style: TextStyle(
-                      fontFamily: 'AppleMyungjo',
-                      fontSize: 16,
-                      fontWeight: FontWeight.bold,
+                  Center(
+                    child: Text(
+                      '$year년의 나',
+                      style: TextStyle(
+                        fontFamily: 'AppleMyungjo',
+                        fontSize: 16,
+                      ),
                     ),
                   ),
-                  SizedBox(height: 8.0),
-                  Text(
-                    answer,
-                    style: TextStyle(
-                      fontFamily: 'AppleMyungjo',
-                      fontSize: 14,
+                  Container(
+                    margin: EdgeInsets.symmetric(vertical: 15.0),
+                    padding: EdgeInsets.all(16.0),
+                    width: double.infinity,
+                    constraints: BoxConstraints(
+                      minWidth: 300,
+                      minHeight: 100,
                     ),
-                  ),
-                  SizedBox(height: 8.0),
-                  Align(
-                    alignment: Alignment.centerRight,
-                    child: IconButton(
-                      icon: Icon(Icons.delete, color: Colors.redAccent),
-                      onPressed: () {
-                        _showDeleteConfirmationDialog(context, year);
-                      },
+                    decoration: BoxDecoration(
+                      border: Border.all(color: Colors.grey),
+                      borderRadius: BorderRadius.circular(12),
+                    ),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        SizedBox(height: 8.0),
+                        Text(
+                          answer,
+                          style: TextStyle(
+                            fontFamily: 'AppleMyungjo',
+                            fontSize: 14,
+                          ),
+                        ),
+                      ],
                     ),
                   ),
                 ],

@@ -123,8 +123,8 @@ class _QuestionScreenState extends State<QuestionScreen> {
         });
         print("Answer submitted: $answer for date: $dateKey");
         _showSnackbar("답변이 제출되었습니다!");
+        _showRevealAnimation();
       }
-      _showRevealAnimation();
     }
   }
 
@@ -226,6 +226,12 @@ class _QuestionScreenState extends State<QuestionScreen> {
                       onPressed: () {
                         Navigator.of(context).pop();
                         _saveAnswer(dateKey, newAnswer);
+                        _answerController.clear();
+                        setState(() {
+                          _isAnswerSubmitted = true;
+                        });
+                        _showSnackbar("답변이 저장되었습니다!"); // 안내문구 표시
+                        _showRevealAnimation(); // 애니메이션 실행
                       },
                     ),
                   ),
@@ -352,9 +358,12 @@ class _QuestionScreenState extends State<QuestionScreen> {
                   style: TextStyle(color: Colors.black, fontSize: 20),
                 ),
                 if (_isBirthday)
-                  IconButton(
-                    icon: Icon(Icons.cake, color: Color(0xFF8B4513)),
-                    onPressed: _showBirthdayAnswers,
+                  Padding(
+                    padding: const EdgeInsets.only(left: 8.0), // 아이콘과 텍스트 사이의 간격 조정
+                    child: IconButton(
+                      icon: Icon(Icons.cake, color: Color(0xFF8B4513)),
+                      onPressed: _showBirthdayAnswers,
+                    ),
                   ),
               ],
             ),
