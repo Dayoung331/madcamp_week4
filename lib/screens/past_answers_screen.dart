@@ -38,28 +38,97 @@ class PastAnswersScreen extends StatelessWidget {
 
   void _showDeleteConfirmationDialog(BuildContext context, String year) {
     showDialog(
-      context: context,
-      builder: (BuildContext context) {
-        return AlertDialog(
-          title: Text('삭제 확인'),
-          content: Text('정말로 삭제하시겠습니까?'),
-          actions: [
-            TextButton(
-              onPressed: () {
-                Navigator.of(context).pop();
-              },
-              child: Text('아니요'),
+        context: context,
+        builder: (BuildContext context) {
+      return AlertDialog(
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(12),
+        ),
+        backgroundColor: Colors.white, // 배경색을 흰색으로 설정
+        titlePadding: EdgeInsets.all(0),
+        contentPadding: EdgeInsets.all(0),
+        actionsPadding: EdgeInsets.symmetric(horizontal: 10, vertical: 5),
+        content: Container(
+          padding: EdgeInsets.symmetric(horizontal: 20, vertical: 20),
+          decoration: BoxDecoration(
+            color: Colors.white, // 배경색을 흰색으로 설정
+            borderRadius: BorderRadius.circular(12),
+          ),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Icon(
+                Icons.error_outline,
+                color: Colors.black,
+                size: 40,
+              ),
+              SizedBox(height: 20),
+              Text(
+                '답변을 삭제하시겠습니까?',
+                style: TextStyle(
+                  fontSize: 16,
+                  fontFamily: 'NotoSerifKR',
+                ),
+              ),
+            ],
+          ),
+        ),
+        actions: [
+          Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 10.0, vertical: 10.0),
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Expanded(
+                  child: TextButton(
+                    style: TextButton.styleFrom(
+                      backgroundColor: Colors.grey[200],
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(8),
+                      ),
+                      padding: EdgeInsets.symmetric(vertical: 12),
+                    ),
+                    child: Text(
+                      '취소',
+                      style: TextStyle(
+                        fontFamily: 'NotoSerifKR',
+                        color: Colors.black,
+                      ),
+                    ),
+                    onPressed: () {
+                      Navigator.of(context).pop();
+                    },
+                  ),
+                ),
+                SizedBox(width: 10), // 버튼 간격 조정
+                Expanded(
+                  child: TextButton(
+                    style: TextButton.styleFrom(
+                      backgroundColor: Colors.black,
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(8),
+                      ),
+                      padding: EdgeInsets.symmetric(vertical: 12),
+                    ),
+                    child: Text(
+                      '삭제',
+                      style: TextStyle(
+                        fontFamily: 'NotoSerifKR',
+                        color: Colors.white,
+                      ),
+                    ),
+                    onPressed: () {
+                      Navigator.of(context).pop();
+                      _deleteAnswer(context, year);
+                    },
+                  ),
+                ),
+              ],
             ),
-            TextButton(
-              onPressed: () {
-                Navigator.of(context).pop(); // 다이얼로그 닫기
-                _deleteAnswer(context, year); // 답변 삭제
-              },
-              child: Text('예'),
-            ),
-          ],
-        );
-      },
+          ),
+        ],
+      );
+    },
     );
   }
 
@@ -67,8 +136,19 @@ class PastAnswersScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text('과거의 나 돌아보기'),
+        centerTitle: true,
+        title: Text('과거의 나 돌아보기', style: TextStyle(fontSize: 20, fontFamily: 'AppleMyungjo')),
+        backgroundColor: Colors.white,
+        leading: IconButton(
+          icon: Icon(Icons.arrow_back_ios, color: Colors.black),
+          padding: const EdgeInsets.only(left: 35.0),
+          onPressed: () {
+            Navigator.of(context).pop();
+          },
+        ),
+        toolbarHeight: 120,
       ),
+      backgroundColor: Colors.white,
       body: Padding(
         padding: const EdgeInsets.all(16.0),
         child: ListView.builder(
