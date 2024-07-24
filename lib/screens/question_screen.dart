@@ -127,11 +127,13 @@ class _QuestionScreenState extends State<QuestionScreen> {
   void _showRevealAnimation() {
     setState(() {
       _showAnimation = true;
+      print('Animation started');
     });
 
     Future.delayed(Duration(seconds: 2), () {
       setState(() {
         _showAnimation = false;
+        print('Animation ended');
       });
     });
   }
@@ -280,14 +282,6 @@ class _QuestionScreenState extends State<QuestionScreen> {
           ],
         ),
         centerTitle: true,
-        actions: [
-          IconButton(
-            icon: Icon(Icons.edit),
-            onPressed: () {
-              _showEditQuestionDialog(dayOfYear);
-            },
-          ),
-        ],
         elevation: 0,
         toolbarHeight: 120, // AppBar height 설정
       ),
@@ -332,6 +326,12 @@ class _QuestionScreenState extends State<QuestionScreen> {
                       softWrap: true,
                       overflow: TextOverflow.visible,
                     ),
+                  ),
+                  IconButton(
+                    icon: Icon(Icons.edit, size: 20),
+                    onPressed: () {
+                      _showEditQuestionDialog(dayOfYear);
+                      },
                   ),
                   Align(
                     alignment: Alignment.centerRight,
@@ -420,8 +420,8 @@ class _QuestionScreenState extends State<QuestionScreen> {
               Center(
                 child: Lottie.asset(
                   'assets/Animation_send.json',
-                  width: 200,
-                  height: 200,
+                  width: 150,
+                  height: 150,
                   fit: BoxFit.fill,
                 ),
               ),
