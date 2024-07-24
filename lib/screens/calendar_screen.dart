@@ -143,6 +143,7 @@ class _CalendarScreenState extends State<CalendarScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      backgroundColor: Colors.white,
       body: SingleChildScrollView(
         child: Column(
           children: [
@@ -346,31 +347,34 @@ class _CalendarScreenState extends State<CalendarScreen> {
               itemCount: _selectedEvents.length,
               itemBuilder: (context, index) {
                 final event = _selectedEvents[index];
-                return ScheduleCard(
-                  title: event,
-                  color: Color(0xFFE5D0B5),
-                  date: _selectedDay ?? DateTime.now(), // 선택된 날짜를 전달
-                  onTap: () {
-                    if (event == 'Diary Entry') {
-                      _navigateToDiary(_selectedDay ?? DateTime.now());
-                    } else {
-                      // dateKey를 생성
-                      String dateKey = DateFormat('MMdd').format(_selectedDay ?? DateTime.now());
-                      // 질문 가져오기
-                      String question = _questions[dateKey] ?? "질문 없음";
-                      // PastAnswersScreen으로 이동
-                      Navigator.push(
-                        context,
-                        MaterialPageRoute(
-                          builder: (context) => PastAnswersScreen(
-                            dateKey: dateKey,
-                            answers: _answers[dateKey] ?? {},
-                            question: question,
+                return Container(
+                  margin: EdgeInsets.symmetric(horizontal: 10.0, vertical: 2.0), // 여백을 조금 더 줄임
+                  child: ScheduleCard(
+                    title: event,
+                    color: Color(0xFFE5D0B5),
+                    date: _selectedDay ?? DateTime.now(), // 선택된 날짜를 전달
+                    onTap: () {
+                      if (event == 'Diary Entry') {
+                        _navigateToDiary(_selectedDay ?? DateTime.now());
+                      } else {
+                        // dateKey를 생성
+                        String dateKey = DateFormat('MMdd').format(_selectedDay ?? DateTime.now());
+                        // 질문 가져오기
+                        String question = _questions[dateKey] ?? "질문 없음";
+                        // PastAnswersScreen으로 이동
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (context) => PastAnswersScreen(
+                              dateKey: dateKey,
+                              answers: _answers[dateKey] ?? {},
+                              question: question,
+                            ),
                           ),
-                        ),
-                      );
-                    }
-                  },
+                        );
+                      }
+                    },
+                  ),
                 );
               },
             ),
@@ -423,6 +427,7 @@ class ScheduleCard extends StatelessWidget {
         elevation: 5.0, // 그림자 설정
         color: Colors.white, // 카드 배경색을 흰색으로 설정
         child: ListTile(
+          contentPadding: EdgeInsets.symmetric(vertical: 8.0, horizontal: 16.0), // 패딩 조정
           leading: Image.asset(
             imagePath,
             width: 40.0, // 이미지 너비 설정
