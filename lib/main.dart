@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:intl/date_symbol_data_local.dart'; // 로케일 초기화
 import 'package:flutter_localizations/flutter_localizations.dart'; // Flutter 로컬라이제이션
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:intl/intl.dart';
 import 'screens/question_screen.dart';
 import 'screens/diary_screen.dart';
 import 'screens/calendar_screen.dart';
@@ -34,10 +35,6 @@ class MyApp extends StatelessWidget {
 }
 
 class MainScreen extends StatefulWidget {
-  final bool showBirthdayScreen;
-
-  MainScreen({this.showBirthdayScreen = false});
-
   @override
   _MainScreenState createState() => _MainScreenState();
 }
@@ -106,12 +103,12 @@ class _MainScreenState extends State<MainScreen> {
     return Scaffold(
       body: Center(
         child: _isBirthdayEntered
-            ? (widget.showBirthdayScreen
+            ? (_isBirthdayToday
             ? BirthdayScreen(onBirthdayMessageSubmitted: _onBirthdayMessageSubmitted)
             : _widgetOptions.elementAt(_selectedIndex))
             : BirthdayInputScreen(onBirthdayEntered: _onBirthdayEntered),
       ),
-      bottomNavigationBar: (_isBirthdayEntered && !widget.showBirthdayScreen)
+      bottomNavigationBar: (_isBirthdayEntered && !_isBirthdayToday)
           ? BottomNavigationBar(
         items: <BottomNavigationBarItem>[
           BottomNavigationBarItem(
