@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:confetti/confetti.dart';
+import 'package:lottie/lottie.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 class BirthdayScreen extends StatefulWidget {
@@ -12,20 +12,22 @@ class BirthdayScreen extends StatefulWidget {
 }
 
 class _BirthdayScreenState extends State<BirthdayScreen> {
-  late ConfettiController _confettiController;
   TextEditingController _textController = TextEditingController();
   bool _isTextFieldVisible = false;
+  bool _isAnimationVisible = true;
 
   @override
   void initState() {
     super.initState();
-    _confettiController = ConfettiController(duration: const Duration(seconds: 10));
-    _confettiController.play(); // 화면이 열리면 색종이가 날리도록 설정
+    Future.delayed(Duration(seconds: 4), () {
+      setState(() {
+        _isAnimationVisible = false;
+      });
+    });
   }
 
   @override
   void dispose() {
-    _confettiController.dispose();
     _textController.dispose();
     super.dispose();
   }
@@ -50,131 +52,130 @@ class _BirthdayScreenState extends State<BirthdayScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: Colors.white,
-      body: Stack(
-        children: [
-          Center(
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                Text(
-                  '생일을 축하합니다!',
-                  style: TextStyle(
-                    fontSize: 40,
-                    fontWeight: FontWeight.bold,
-                    color: Colors.black,
-                    fontFamily: 'AppleMyungjo',
-                  ),
-                ),
-                SizedBox(height: 20),
-                Text(
-                  '생일을 행복하게 보내고 계신가요?',
-                  textAlign: TextAlign.center,
-                  style: TextStyle(
-                    fontSize: 20,
-                    color: Colors.grey,
-                    fontFamily: 'AppleMyungjo',
-                  ),
-                ),
-                Text(
-                  '올해의 생일은 어떻게 보냈는지 작성해주세요!',
-                  textAlign: TextAlign.center,
-                  style: TextStyle(
-                    fontSize: 20,
-                    color: Colors.grey,
-                    fontFamily: 'AppleMyungjo',
-                  ),
-                ),
-                SizedBox(height: 50),
-                ElevatedButton(
-                  onPressed: () {
-                    setState(() {
-                      _isTextFieldVisible = true;
-                      _confettiController.play();
-                    });
-                  },
-                  child: Text('작성하러 가기'),
-                  style: ElevatedButton.styleFrom(
-                    foregroundColor: Colors.black,
-                    backgroundColor: Color(0xFFE5D0B5),
-                    textStyle: TextStyle(
-                      fontSize: 18,
+      body: GestureDetector(
+        onTap: () {
+          FocusScope.of(context).unfocus(); // 키보드를 숨깁니다.
+        },
+        child: Stack(
+          children: [
+            Center(
+              child: _isAnimationVisible
+                  ? Lottie.asset(
+                'assets/present.json',
+                width: 600,
+                height: 400,
+                fit: BoxFit.fill,
+              )
+                  : Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Text(
+                    '생일을 축하합니다!',
+                    style: TextStyle(
+                      fontSize: 35,
                       fontWeight: FontWeight.bold,
-                      fontFamily: 'AppleMyungjo',
-                    ),
-                    padding: EdgeInsets.symmetric(horizontal: 30, vertical: 15),
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(30),
+                      color: Colors.black,
+                      fontFamily: 'NotoSerifKR',
                     ),
                   ),
-                ),
-                SizedBox(height: 10),
-                ElevatedButton(
-                  onPressed: _navigateToQuestionScreen,
-                  child: Text('나중에 작성하기'),
-                  style: ElevatedButton.styleFrom(
-                    foregroundColor: Colors.black,
-                    backgroundColor: Color(0xFFE5D0B5),
-                    textStyle: TextStyle(
+                  SizedBox(height: 20),
+                  Text(
+                    '생일을 행복하게 보내고 계신가요?',
+                    textAlign: TextAlign.center,
+                    style: TextStyle(
                       fontSize: 18,
-                      fontWeight: FontWeight.bold,
-                      fontFamily: 'AppleMyungjo',
-                    ),
-                    padding: EdgeInsets.symmetric(horizontal: 30, vertical: 15),
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(30),
+                      color: Colors.grey,
+                      fontFamily: 'NotoSerifKR',
                     ),
                   ),
-                ),
-                if (_isTextFieldVisible)
-                  Column(
-                    children: [
-                      SizedBox(height: 20),
-                      TextField(
-                        controller: _textController,
-                        decoration: InputDecoration(
-                          labelText: '생일 메시지 작성',
-                          border: OutlineInputBorder(),
-                          labelStyle: TextStyle(fontFamily: 'AppleMyungjo'),
+                  Text(
+                    '올해의 생일은 어떻게 보냈는지 작성해주세요!',
+                    textAlign: TextAlign.center,
+                    style: TextStyle(
+                      fontSize: 18,
+                      color: Colors.grey,
+                      fontFamily: 'NotoSerifKR',
+                    ),
+                  ),
+                  SizedBox(height: 50),
+                  if (!_isTextFieldVisible)
+                    ElevatedButton(
+                      onPressed: () {
+                        setState(() {
+                          _isTextFieldVisible = true;
+                        });
+                      },
+                      child: Text('작성하러 가기'),
+                      style: ElevatedButton.styleFrom(
+                        foregroundColor: Colors.white,
+                        backgroundColor: Color(0xFF252525),
+                        textStyle: TextStyle(
+                          fontSize: 16,
+                          fontFamily: 'NotoSerifKR',
                         ),
-                        style: TextStyle(fontFamily: 'AppleMyungjo'),
-                      ),
-                      SizedBox(height: 20),
-                      ElevatedButton(
-                        onPressed: _submitBirthdayMessage,
-                        child: Text('제출'),
-                        style: ElevatedButton.styleFrom(
-                          foregroundColor: Colors.black,
-                          backgroundColor: Color(0xFFE5D0B5),
-                          textStyle: TextStyle(
-                            fontSize: 18,
-                            fontWeight: FontWeight.bold,
-                            fontFamily: 'AppleMyungjo',
-                          ),
-                          padding: EdgeInsets.symmetric(horizontal: 30, vertical: 15),
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(30),
-                          ),
+                        padding: EdgeInsets.symmetric(horizontal: 30, vertical: 15),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(30),
                         ),
                       ),
-                    ],
+                    ),
+                  if (_isTextFieldVisible)
+                    Column(
+                      children: [
+                        Container(
+                          margin: EdgeInsets.symmetric(horizontal: 20.0),
+                          padding: EdgeInsets.all(10.0),
+                          decoration: BoxDecoration(
+                            borderRadius: BorderRadius.circular(10),
+                            border: Border.all(color: Colors.grey),
+                          ),
+                          child: TextField(
+                            controller: _textController,
+                            decoration: InputDecoration(
+                              labelText: '생일 메시지 작성',
+                              border: InputBorder.none,
+                              labelStyle: TextStyle(fontFamily: 'NotoSerifKR'),
+                            ),
+                            style: TextStyle(fontFamily: 'NotoSerifKR'),
+                            maxLines: 5,
+                          ),
+                        ),
+                        SizedBox(height: 20),
+                        ElevatedButton(
+                          onPressed: _submitBirthdayMessage,
+                          child: Text('제출'),
+                          style: ElevatedButton.styleFrom(
+                            foregroundColor: Colors.white,
+                            backgroundColor: Color(0xFF252525),
+                            textStyle: TextStyle(
+                              fontSize: 16,
+                              fontFamily: 'NotoSerifKR',
+                            ),
+                            padding: EdgeInsets.symmetric(horizontal: 70, vertical: 15),
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(30),
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
+                  SizedBox(height: 10),
+                  TextButton(
+                    onPressed: _navigateToQuestionScreen,
+                    child: Text(
+                      '나중에 작성하기',
+                      style: TextStyle(
+                        fontSize: 16,
+                        fontFamily: 'NotoSerifKR',
+                        color: Colors.grey, // 글씨 색상 설정
+                      ),
+                    ),
                   ),
-              ],
+                ],
+              ),
             ),
-          ),
-          Align(
-            alignment: Alignment.topCenter,
-            child: ConfettiWidget(
-              confettiController: _confettiController,
-              blastDirection: 3.14 / 2, // 색종이가 아래로 날리도록 설정
-              emissionFrequency: 0.05,
-              numberOfParticles: 5,
-              maxBlastForce: 5,
-              minBlastForce: 1,
-              gravity: 0.1,
-              colors: [Colors.red, Colors.blue, Colors.green, Colors.yellow, Colors.orange, Colors.purple], // 색종이 색상
-            ),
-          ),
-        ],
+          ],
+        ),
       ),
     );
   }
