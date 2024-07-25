@@ -380,12 +380,12 @@ class _DiaryScreenState extends State<DiaryScreen> {
         onPressed: () {
           _saveDiary();
         },
-        backgroundColor: Color(0xFFE5D0B5),
+        backgroundColor: Color(0xFF252525),
         label: Text(
           '작성 완료',
           style: TextStyle(
             fontFamily: 'NotoSerifKR',
-            color: Colors.black,
+            color: Colors.white,
           ),
         ),
       )
@@ -397,8 +397,8 @@ class _DiaryScreenState extends State<DiaryScreen> {
             _contentController.clear();
           });
         },
-        backgroundColor: Color(0xFFE5D0B5),
-        child: Icon(Icons.add, color: Colors.black),
+        backgroundColor: Color(0xFF252525),
+        child: Icon(Icons.add, color: Colors.white),
       ),
     );
   }

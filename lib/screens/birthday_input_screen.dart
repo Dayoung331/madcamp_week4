@@ -47,9 +47,9 @@ class _BirthdayInputScreenState extends State<BirthdayInputScreen> {
       context: context,
       builder: (BuildContext context) {
         return Container(
-          height: 300,
           color: Colors.white,
           child: Column(
+            mainAxisSize: MainAxisSize.min, // Adjusts the size based on content
             children: <Widget>[
               Container(
                 height: 200,
@@ -86,12 +86,6 @@ class _BirthdayInputScreenState extends State<BirthdayInputScreen> {
       appBar: AppBar(
         backgroundColor: Colors.white,
         elevation: 0,
-        leading: IconButton(
-          icon: Icon(Icons.arrow_back_ios, color: Colors.black),
-          onPressed: () {
-            Navigator.pop(context); // 뒤로 가기 동작
-          },
-        ),
       ),
       body: Padding(
         padding: const EdgeInsets.all(20.0),
@@ -100,9 +94,9 @@ class _BirthdayInputScreenState extends State<BirthdayInputScreen> {
           children: [
             Image.asset(
               'assets/images/cake.png', // 케이크 이미지 경로
-              height: 200,
+              height: 250,
             ),
-            SizedBox(height: 40),
+            SizedBox(height: 20),
             Text(
               '당신의 생일은 언제인가요?',
               style: TextStyle(
@@ -135,7 +129,7 @@ class _BirthdayInputScreenState extends State<BirthdayInputScreen> {
             ElevatedButton(
               onPressed: _saveBirthday,
               style: ElevatedButton.styleFrom(
-                backgroundColor: Color(0xFF8B7C6E),
+                backgroundColor: Color(0xFF252525),
                 padding: EdgeInsets.symmetric(horizontal: 167, vertical: 15),
                 shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(10),

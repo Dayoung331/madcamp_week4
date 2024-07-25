@@ -91,6 +91,8 @@ flutter:
     - assets/images/diary.png
     - assets/images/question.png
     - assets/images/calendar_diary.png
+    - assets/images/diary_icon.png
+    - assets/images/calendar_question.png
     - assets/images/calendar_question_and_answer.png
     - assets/Animation_send.json
     - assets/images/paper_texture.jpg

@@ -25,25 +25,55 @@ class BirthdayAnswersScreen extends StatelessWidget {
         toolbarHeight: 120,
       ),
       backgroundColor: Colors.white,
-      body: ListView.builder(
-        itemCount: birthdayAnswers.length,
-        itemBuilder: (context, index) {
-          String year = birthdayAnswers.keys.elementAt(index);
-          String answer = birthdayAnswers.values.elementAt(index);
-          return ListTile(
-            title: Text(
-              '$year년의 답변',
-              style: TextStyle(fontFamily: 'NotoSerifKR', fontSize: 16, color: Colors.black),
-            ),
-            subtitle: Text(
-              answer,
-              style: TextStyle(fontFamily: 'NotoSerifKR', fontSize: 14, color: Colors.black87),
-            ),
-            trailing: Icon(Icons.cake, color: Colors.pink),
-          );
-        },
+      body: Padding(
+        padding: const EdgeInsets.only(left: 25.0, right: 25.0, bottom: 16.0),
+        child: ListView.builder(
+          itemCount: birthdayAnswers.length,
+          itemBuilder: (context, index) {
+            String year = birthdayAnswers.keys.elementAt(index);
+            String answer = birthdayAnswers.values.elementAt(index);
+            return Column(
+              children: [
+                Center(
+                  child: Text(
+                    '$year년의 생일',
+                    style: TextStyle(
+                      fontFamily: 'NotoSerifKR',
+                      fontSize: 16,
+                    ),
+                  ),
+                ),
+                Container(
+                  margin: EdgeInsets.symmetric(vertical: 15.0),
+                  padding: EdgeInsets.all(16.0),
+                  width: double.infinity,
+                  constraints: BoxConstraints(
+                    minWidth: 300,
+                    minHeight: 100,
+                  ),
+                  decoration: BoxDecoration(
+                    border: Border.all(color: Colors.grey),
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      SizedBox(height: 8.0),
+                      Text(
+                        answer,
+                        style: TextStyle(
+                          fontFamily: 'NotoSerifKR',
+                          fontSize: 14,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ],
+            );
+          },
+        ),
       ),
     );
   }
 }
-
