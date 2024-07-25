@@ -361,7 +361,7 @@ class _QuestionScreenState extends State<QuestionScreen> {
                   Padding(
                     padding: const EdgeInsets.only(left: 8.0), // 아이콘과 텍스트 사이의 간격 조정
                     child: IconButton(
-                      icon: Icon(Icons.cake, color: Color(0xFF8B4513)),
+                      icon: Icon(Icons.cake, color: Colors.pink),
                       onPressed: _showBirthdayAnswers,
                     ),
                   ),
@@ -517,12 +517,15 @@ class _QuestionScreenState extends State<QuestionScreen> {
               ),
             ),
             if (_showAnimation)
-              Center(
-                child: Lottie.asset(
-                  'assets/Animation_send.json',
-                  width: 150,
-                  height: 150,
-                  fit: BoxFit.fill,
+              Container(
+                color: Colors.white.withOpacity(0.8),
+                child: Center(
+                  child: Lottie.asset(
+                    'assets/Animation_send.json',
+                    width: 150,
+                    height: 150,
+                    fit: BoxFit.fill,
+                  ),
                 ),
               ),
           ],

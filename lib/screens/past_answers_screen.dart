@@ -184,12 +184,12 @@ class _PastAnswersScreenState extends State<PastAnswersScreen> {
                   '저장 완료',
                   style: TextStyle(
                     fontFamily: 'NotoSerifKR',
-                    color: Colors.black,
+                    color: Colors.white,
                     fontSize: 16,
                   ),
                 ),
                 style: ElevatedButton.styleFrom(
-                  backgroundColor: Color(0xFFE5D0B5),
+                  backgroundColor: Color(0xFF252525),
                   shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(10),
                   ),

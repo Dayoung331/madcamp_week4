@@ -28,7 +28,7 @@ class EntryForm extends StatelessWidget {
             style: TextStyle(
               fontSize: 22,
               fontWeight: FontWeight.bold,
-              fontFamily: 'AppleMyungjo',
+              fontFamily: 'NotoSerifKR',
               color: Colors.black87,
             ),
           ),
@@ -52,14 +52,14 @@ class EntryForm extends StatelessWidget {
                   hintStyle: TextStyle(
                     color: Colors.grey,
                     fontSize: 18,
-                    fontFamily: 'AppleMyungjo',
+                    fontFamily: 'NotoSerifKR',
                   ),
                   border: InputBorder.none,
                 ),
                 style: TextStyle(
                   fontSize: 18,
                   fontWeight: FontWeight.bold,
-                  fontFamily: 'AppleMyungjo',
+                  fontFamily: 'NotoSerifKR',
                   color: Colors.black87,
                 ),
               ),
@@ -85,13 +85,13 @@ class EntryForm extends StatelessWidget {
                   hintStyle: TextStyle(
                     color: Colors.grey,
                     fontSize: 16,
-                    fontFamily: 'AppleMyungjo',
+                    fontFamily: 'NotoSerifKR',
                   ),
                   border: InputBorder.none,
                 ),
                 style: TextStyle(
                   fontSize: 16,
-                  fontFamily: 'AppleMyungjo',
+                  fontFamily: 'NotoSerifKR',
                   color: Colors.black87,
                 ),
                 maxLines: 5,
@@ -104,13 +104,13 @@ class EntryForm extends StatelessWidget {
             child: Text(
               '저장 완료',
               style: TextStyle(
-                fontFamily: 'AppleMyungjo',
-                color: Colors.black,
+                fontFamily: 'NotoSerifKR',
+                color: Colors.white,
                 fontSize: 16,
               ),
             ),
             style: ElevatedButton.styleFrom(
-              backgroundColor: Color(0xFFE5D0B5),
+              backgroundColor: Color(0xFF252525),
               shape: RoundedRectangleBorder(
                 borderRadius: BorderRadius.circular(10),
               ),
