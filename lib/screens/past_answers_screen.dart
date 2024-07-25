@@ -67,7 +67,7 @@ class _PastAnswersScreenState extends State<PastAnswersScreen> {
             children: [
               ListTile(
                 leading: Icon(Icons.edit),
-                title: Text('답변 수정하기'),
+                title: Text('답변 수정하기', style: TextStyle(fontFamily: 'NotoSerifKR')),
                 onTap: () {
                   Navigator.of(context).pop();
                   _showEditBottomSheet(context, year, contentController);
@@ -75,7 +75,7 @@ class _PastAnswersScreenState extends State<PastAnswersScreen> {
               ),
               ListTile(
                 leading: Icon(Icons.delete),
-                title: Text('답변 삭제하기'),
+                title: Text('답변 삭제하기', style: TextStyle(fontFamily: 'NotoSerifKR')),
                 onTap: () {
                   Navigator.of(context).pop();
                   _showDeleteConfirmationDialog(context, year);
